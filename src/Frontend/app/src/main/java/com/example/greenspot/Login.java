@@ -54,7 +54,7 @@ public class Login extends AppCompatActivity {
                         .build();
 
                 Request request = new Request.Builder()
-                        .url("http://10.0.2.2:8080/api/user/login") // Use o endereço IP do seu computador
+                        .url("http://34.71.212.32:8080/api/user/login")
                         .post(requestBody)
                         .build();
 
