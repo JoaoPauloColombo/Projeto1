@@ -54,15 +54,22 @@ public class Login extends AppCompatActivity {
                         .build();
 
                 Request request = new Request.Builder()
-                        .url("http://34.71.212.32:8080/api/user/login")
+                        .url("https://projeto1-1vh9.onrender.com/api/user/login")
                         .post(requestBody)
                         .build();
 
-                OkHttpClient client = new OkHttpClient();
+                // Crie uma instância do CustomTrustManager
+                CustomTrustManager customTrustManager = new CustomTrustManager();
+
+                // Crie um OkHttpClient com o CustomTrustManager
+                OkHttpClient client = customTrustManager.getOkHttpClient();
+
                 client.newCall(request).enqueue(new okhttp3.Callback() {
                     @Override
                     public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
                         System.out.println("Erro ao fazer login: " + e.getMessage());
+                        System.out.println("Causa: " + e.getCause());
+                        System.out.println("Mensagem: " + e.getMessage());
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -73,10 +80,13 @@ public class Login extends AppCompatActivity {
 
                     @Override
                     public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
-                        if (response.isSuccessful()) {
-                            String responseBody = response.body().string();
-                            System.out.println("Resposta do servidor: " + responseBody);
+                        System.out.println("Resposta do servidor: " + response.code());
+                        System.out.println("Cabeçalhos da resposta: " + response.headers());
 
+                        String responseBody = response.body().string();
+                        System.out.println("Corpo da resposta: " + responseBody);
+
+                        if (response.isSuccessful()) {
                             // Parse o token de autenticação
                             JSONObject jsonObject = null;
                             try {
@@ -91,9 +101,13 @@ public class Login extends AppCompatActivity {
                                 throw new RuntimeException(e);
                             }
 
+                            System.out.println("Token de autenticação: " + token);
+
                             // Salve o token de autenticação em um lugar seguro
                             SharedPreferences sharedPreferences = getSharedPreferences("auth", MODE_PRIVATE);
                             sharedPreferences.edit().putString("token", token).apply();
+
+                            System.out.println("Token de autenticação salvo com sucesso");
 
                             // Redirecione o usuário para a tela principal
                             Intent intent = new Intent(Login.this, MainActivity.class);

@@ -17,7 +17,21 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.io.InputStream;
+import java.security.KeyStore;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLContextSpi;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSessionContext;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -69,11 +83,11 @@ public class Cadastro extends AppCompatActivity {
     }
 
     private void cadastrar(String nome, String email, String senha) {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
+        // Crie uma instância do CustomTrustManager
+        CustomTrustManager customTrustManager = new CustomTrustManager();
+
+        // Crie um OkHttpClient com o CustomTrustManager
+        OkHttpClient client = customTrustManager.getOkHttpClient();
 
         System.out.println("Valor de 'nome': " + nome);
         RequestBody requestBody = new okhttp3.FormBody.Builder()
@@ -83,7 +97,7 @@ public class Cadastro extends AppCompatActivity {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://34.71.212.32:8080/api/user")
+                .url("https://projeto1-1vh9.onrender.com/api/user")
                 .post(requestBody)
                 .build();
 
