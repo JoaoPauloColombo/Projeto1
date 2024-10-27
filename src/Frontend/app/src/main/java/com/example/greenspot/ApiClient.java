@@ -13,7 +13,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://34.71.212.32:8080/api";
+    private static final String BASE_URL = "https://projeto1-1vh9.onrender.com/api";
     private static final OkHttpClient client = new OkHttpClient();
 
     public static void cadastrar(String nome, String email, String senha, Callback callback) {

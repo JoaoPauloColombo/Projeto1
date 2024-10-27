@@ -17,6 +17,21 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLContextSpi;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSessionContext;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -68,7 +83,12 @@ public class Cadastro extends AppCompatActivity {
     }
 
     private void cadastrar(String nome, String email, String senha) {
-        OkHttpClient client = new OkHttpClient();
+        // Crie uma instância do CustomTrustManager
+        CustomTrustManager customTrustManager = new CustomTrustManager();
+
+        // Crie um OkHttpClient com o CustomTrustManager
+        OkHttpClient client = customTrustManager.getOkHttpClient();
+
         System.out.println("Valor de 'nome': " + nome);
         RequestBody requestBody = new okhttp3.FormBody.Builder()
                 .add("nome", nome)
@@ -77,14 +97,23 @@ public class Cadastro extends AppCompatActivity {
                 .build();
 
         Request request = new Request.Builder()
-                .url("http://10.0.2.2:8080/api/user")
+                .url("https://projeto1-1vh9.onrender.com/api/user")
                 .post(requestBody)
                 .build();
+
+        System.out.println("URL: " + request.url());
+        System.out.println("Método: " + request.method());
+        System.out.println("Cabeçalhos: " + request.headers());
+        System.out.println("Corpo da requisição: " + requestBody.toString());
 
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
                 System.out.println("Erro ao cadastrar usuário: " + e.getMessage());
+                System.out.println("URL: " + call.request().url());
+                System.out.println("Método: " + call.request().method());
+                System.out.println("Cabeçalhos: " + call.request().headers());
+                System.out.println("Corpo da requisição: " + requestBody.toString());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -95,6 +124,9 @@ public class Cadastro extends AppCompatActivity {
 
             @Override
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
+                System.out.println("Resposta do servidor: " + response.code());
+                System.out.println("Cabeçalhos da resposta: " + response.headers());
+                System.out.println("Corpo da resposta: " + response.body().string());
                 if (response.isSuccessful()) {
                     // ...
                 } else {

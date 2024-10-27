@@ -5,10 +5,13 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+
       <SelectionState runConfigName="Login">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="Tutorial">
+      <SelectionState runConfigName="Mapa">
+
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
