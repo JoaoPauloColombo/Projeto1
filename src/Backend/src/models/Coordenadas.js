@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
 
-const Ecoponto = sequelize.define('ecoponto', {
+const Coordenadas = sequelize.define('ecoponto', {
     latitude: {
         type: DataTypes.DOUBLE,
         allowNull: false
@@ -16,4 +16,4 @@ const Ecoponto = sequelize.define('ecoponto', {
     }
 });
 
-module.exports = Ecoponto;
+module.exports = Coordenadas;
