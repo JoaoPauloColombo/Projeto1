@@ -54,24 +54,37 @@ const UserController = {
 
   create: async (req, res) => {
     try {
-      const { nome, senha, email } = req.body;
-
+      let { nome, senha, email } = req.body;
+  
+      // Remover espaços em branco desnecessários
+      nome = nome.trim();
+      senha = senha.trim();
+      email = email.trim();
+  
+      // Log para verificar os dados recebidos
+      console.log(`Dados recebidos: Nome: ${nome}, Email: ${email}, Senha: ${senha}`);
+  
+      // Verificar se a senha está vazia
+      if (!senha) {
+        return res.status(400).json({ msg: "Senha não pode ser vazia." });
+      }
+  
       // Criptografar a senha antes de salvar
       const shift = senha.length; // Usando o comprimento da senha como deslocamento
       const encryptedSenha = encrypt(senha, shift);
-
+  
       // Log para ver a senha normal e a senha criptografada
       console.log(`Senha normal: ${senha}`);
       console.log(`Senha criptografada: ${encryptedSenha}`);
-
+  
       const userCriado = await User.create({ nome, senha: encryptedSenha, email });
-
+  
       return res.status(200).json({
         msg: "Usuário criado com sucesso!",
         user: userCriado,
       });
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao criar usuário:", error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
