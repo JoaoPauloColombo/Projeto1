@@ -40,17 +40,21 @@ public class Login extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = emailTextInputLayout.getEditText().getText().toString();
-                String senha = senhaTextInputLayout.getEditText().getText().toString();
+                String email = emailTextInputLayout.getEditText().getText().toString().trim();
+                String senha = senhaTextInputLayout.getEditText().getText().toString().trim();
 
                 if (email.isEmpty() || senha.isEmpty()) {
                     Toast.makeText(Login.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
+                // Criptografe a senha antes de enviar
+                int shift = senha.length(); // Você pode usar uma abordagem mais segura para o deslocamento
+                String encryptedSenha = Criptografia.encrypt(senha, shift);
+
                 RequestBody requestBody = new okhttp3.FormBody.Builder()
                         .add("email", email)
-                        .add("senha", senha)
+                        .add("senha", encryptedSenha)
                         .build();
 
                 Request request = new Request.Builder()
@@ -67,64 +71,58 @@ public class Login extends AppCompatActivity {
                 client.newCall(request).enqueue(new okhttp3.Callback() {
                     @Override
                     public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
-                        System.out.println("Erro ao fazer login: " + e.getMessage());
-                        System.out.println("Causa: " + e.getCause());
-                        System.out.println("Mensagem: " + e.getMessage());
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(Login.this, "Erro ao fazer login", Toast.LENGTH_SHORT).show();
-                            }
+                        runOnUiThread(() -> {
+                            Toast.makeText(Login.this, "Erro ao fazer login: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         });
                     }
 
                     @Override
                     public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
-                        System.out.println("Resposta do servidor: " + response.code());
-                        System.out.println("Cabeçalhos da resposta: " + response.headers());
-
-                        String responseBody = response.body().string();
-                        System.out.println("Corpo da resposta: " + responseBody);
+                        String responseBody = response.body() != null ? response.body().string() : "";
 
                         if (response.isSuccessful()) {
-                            // Parse o token de autenticação
-                            JSONObject jsonObject = null;
                             try {
-                                jsonObject = new JSONObject(responseBody);
+                                JSONObject jsonObject = new JSONObject(responseBody);
+                                String token = jsonObject.getString("token");
+
+                                // Salve o token de autenticação em um lugar seguro
+                                SharedPreferences sharedPreferences = getSharedPreferences("auth", MODE_PRIVATE);
+                                sharedPreferences.edit().putString("token", token).apply();
+
+                                // Redirecione o usuário para a tela principal
+                                Intent intent = new Intent(Login.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
                             } catch (JSONException e) {
-                                throw new RuntimeException(e);
+                                runOnUiThread(() -> Toast.makeText(Login.this, "Erro ao processar a resposta", Toast.LENGTH_SHORT).show());
                             }
-                            String token = null;
-                            try {
-                                token = jsonObject.getString("token");
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
-                            }
-
-                            System.out.println("Token de autenticação: " + token);
-
-                            // Salve o token de autenticação em um lugar seguro
-                            SharedPreferences sharedPreferences = getSharedPreferences("auth", MODE_PRIVATE);
-                            sharedPreferences.edit().putString("token", token).apply();
-
-                            System.out.println("Token de autenticação salvo com sucesso");
-
-                            // Redirecione o usuário para a tela principal
-                            Intent intent = new Intent(Login.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
                         } else {
-                            System.out.println("Erro ao fazer login: " + response.code());
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(Login.this, "Erro ao fazer login", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            runOnUiThread(() -> Toast.makeText(Login.this, "Erro ao fazer login: " + response.message(), Toast.LENGTH_SHORT).show());
                         }
                     }
+
+
                 });
+
             }
+
         });
+
+    }
+    public static class Criptografia {
+
+        public static String encrypt(String text, int shift) {
+            StringBuilder result = new StringBuilder();
+
+            for (char character : text.toCharArray()) {
+                if (Character.isLetter(character)) {
+                    char base = Character.isLowerCase(character) ? 'a' : 'A';
+                    character = (char) ((character - base + shift) % 26 + base);
+                }
+                result.append(character);
+            }
+            return result.toString();
+        }
+
     }
 }

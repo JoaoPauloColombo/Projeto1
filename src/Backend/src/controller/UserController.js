@@ -1,44 +1,50 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 
+// Funções de criptografia
+const encrypt = (text, shift) => {
+    return text.split('').map(char => {
+        if (/[a-zA-Z]/.test(char)) {
+            const code = char.charCodeAt(0);
+            const base = code >= 97 ? 97 : 65;
+            return String.fromCharCode(((code - base + shift) % 26) + base);
+        }
+        return char;
+    }).join('');
+};
+
+const decrypt = (text, shift) => {
+    return encrypt(text, 26 - shift); 
+};
+
 const UserController = {
-  /**
-   * Função para login de usuário
-   * @param {Object} req - Requisição do cliente
-   * @param {Object} res - Resposta do servidor
-   */
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
 
-      console.log("Email:", email);
-      console.log("Senha:", senha);
-
       // Buscar usuário
       const user = await User.findOne({ where: { email } });
 
-      console.log("Usuário encontrado:", user);
-
       if (!user) {
-        console.log("Usuário não encontrado");
-        return res.status(401).json({ msg: "Usuário não encontrado. Por favor, verifique seu email e senha." });
+        return res.status(401).json({ msg: "Usuário não encontrado." });
       }
 
+      // Descriptografar senha do banco de dados
+      const shift = user.senha.length; // Usando o comprimento da senha como deslocamento
+      const decryptedSenha = decrypt(user.senha, shift);
+
       // Comparar senha
-      if (user.senha !== senha) {
-        console.log("Senha incorreta");
-        return res.status(401).json({ msg: "Senha incorreta. Por favor, verifique sua senha." });
+      if (decryptedSenha !== senha) {
+        return res.status(401).json({ msg: "Senha incorreta." });
       }
 
       // Gerar token
       const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
 
-      console.log("Token gerado:", token);
-
       return res.status(200).json({ msg: "Login realizado", token });
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      return res.status(500).json({ msg: "Erro ao fazer login. Por favor, tente novamente." });
+      return res.status(500).json({ msg: "Erro ao fazer login." });
     }
   },
 
@@ -46,16 +52,14 @@ const UserController = {
     try {
       const { nome, senha, email } = req.body;
 
-      console.log("Nome:", nome);
-      console.log("Senha:", senha);
-      console.log("Email:", email);
+      // Criptografar a senha antes de salvar
+      const shift = senha.length; // Usando o comprimento da senha como deslocamento
+      const encryptedSenha = encrypt(senha, shift);
 
-      const userCriado = await User.create({ nome, senha, email });
-
-      console.log("Usuário criado:", userCriado);
+      const userCriado = await User.create({ nome, senha: encryptedSenha, email });
 
       return res.status(200).json({
-        msg: "Usuario criado com sucesso!",
+        msg: "Usuário criado com sucesso!",
         user: userCriado,
       });
     } catch (error) {
