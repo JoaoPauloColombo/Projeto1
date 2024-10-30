@@ -3,18 +3,18 @@ const jwt = require('jsonwebtoken');
 
 // Funções de criptografia
 const encrypt = (text, shift) => {
-    return text.split('').map(char => {
-        if (/[a-zA-Z]/.test(char)) {
-            const code = char.charCodeAt(0);
-            const base = code >= 97 ? 97 : 65;
-            return String.fromCharCode(((code - base + shift) % 26) + base);
-        }
-        return char;
-    }).join('');
+  return text.split('').map(char => {
+    if (/[a-zA-Z]/.test(char)) {
+      const code = char.charCodeAt(0);
+      const base = code >= 97 ? 97 : 65; // 'a' ou 'A'
+      return String.fromCharCode(((code - base + shift) % 26) + base);
+    }
+    return char;
+  }).join('');
 };
 
 const decrypt = (text, shift) => {
-    return encrypt(text, 26 - shift); 
+  return encrypt(text, 26 - shift);
 };
 
 const UserController = {
@@ -67,6 +67,7 @@ const UserController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -79,33 +80,39 @@ const UserController = {
 
       if (userUpdate == null) {
         return res.status(404).json({
-          msg: "usuario nao encontrado",
+          msg: "Usuário não encontrado",
         });
       }
 
+      // Criptografar a nova senha antes de atualizar
+      const shift = senha.length; // Usando o comprimento da nova senha como deslocamento
+      const encryptedSenha = encrypt(senha, shift);
+
       const updated = await userUpdate.update({
         nome,
-        senha,
+        senha: encryptedSenha, // Atualizando a senha criptografada
         email,
       });
+
       if (updated) {
         return res.status(200).json({
-          msg: "Usuario atualizado com sucesso!",
+          msg: "Usuário atualizado com sucesso!",
         });
       }
       return res.status(500).json({
-        msg: "Erro ao atualizar usuario",
+        msg: "Erro ao atualizar usuário",
       });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+
   getAll: async (req, res) => {
     try {
       const usuarios = await User.findAll();
       return res.status(200).json({
-        msg: "Usuarios Encontrados!",
+        msg: "Usuários Encontrados!",
         usuarios,
       });
     } catch (error) {
