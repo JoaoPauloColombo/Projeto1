@@ -70,18 +70,11 @@ public class Cadastro extends AppCompatActivity {
         // Crie um OkHttpClient com o CustomTrustManager
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
-        // Defina um deslocamento baseado no comprimento da senha
-        int shift = senha.length(); // Você pode usar qualquer método para determinar o deslocamento
-
-        // Criptografe os dados
-        String encryptedNome = Criptografia.encrypt(nome, shift);
-        String encryptedEmail = Criptografia.encrypt(email, shift);
-        String encryptedSenha = Criptografia.encrypt(senha, shift);
-
+        // Não criptografe os dados, envie-os diretamente
         RequestBody requestBody = new okhttp3.FormBody.Builder()
-                .add("nome", encryptedNome)
-                .add("email", encryptedEmail)
-                .add("senha", encryptedSenha)
+                .add("nome", nome)
+                .add("email", email)
+                .add("senha", senha)
                 .build();
 
         Request request = new Request.Builder()
@@ -112,23 +105,5 @@ public class Cadastro extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    public static class Criptografia {
-
-        // Método para criptografar
-        public static String encrypt(String text, int shift) {
-            StringBuilder result = new StringBuilder();
-
-            for (char character : text.toCharArray()) {
-                if (Character.isLetter(character)) {
-                    char base = Character.isLowerCase(character) ? 'a' : 'A';
-                    character = (char) ((character - base + shift) % 26 + base);
-                }
-                result.append(character);
-            }
-            return result.toString();
-        }
-
     }
 }

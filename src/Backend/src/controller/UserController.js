@@ -22,23 +22,27 @@ const UserController = {
     try {
       const { email, senha } = req.body;
 
-      // Buscar usuário
+      // Buscar usuário pelo email
       const user = await User.findOne({ where: { email } });
 
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
       }
 
-      // Descriptografar senha do banco de dados
+      // Descriptografar a senha do banco de dados
       const shift = user.senha.length; // Usando o comprimento da senha como deslocamento
       const decryptedSenha = decrypt(user.senha, shift);
 
-      // Comparar senha
+      // Log para ver a senha fornecida e a senha descriptografada
+      console.log(`Senha fornecida: ${senha}`);
+      console.log(`Senha descriptografada: ${decryptedSenha}`);
+
+      // Comparar a senha descriptografada com a senha fornecida
       if (decryptedSenha !== senha) {
         return res.status(401).json({ msg: "Senha incorreta." });
       }
 
-      // Gerar token
+      // Gerar token JWT
       const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
 
       return res.status(200).json({ msg: "Login realizado", token });
@@ -55,6 +59,10 @@ const UserController = {
       // Criptografar a senha antes de salvar
       const shift = senha.length; // Usando o comprimento da senha como deslocamento
       const encryptedSenha = encrypt(senha, shift);
+
+      // Log para ver a senha normal e a senha criptografada
+      console.log(`Senha normal: ${senha}`);
+      console.log(`Senha criptografada: ${encryptedSenha}`);
 
       const userCriado = await User.create({ nome, senha: encryptedSenha, email });
 
@@ -87,6 +95,10 @@ const UserController = {
       // Criptografar a nova senha antes de atualizar
       const shift = senha.length; // Usando o comprimento da nova senha como deslocamento
       const encryptedSenha = encrypt(senha, shift);
+
+      // Log para ver a nova senha e a senha criptografada
+      console.log(`Nova senha normal: ${senha}`);
+      console.log(`Nova senha criptografada: ${encryptedSenha}`);
 
       const updated = await userUpdate.update({
         nome,

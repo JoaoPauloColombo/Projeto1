@@ -48,13 +48,10 @@ public class Login extends AppCompatActivity {
                     return;
                 }
 
-                // Criptografe a senha antes de enviar
-                int shift = senha.length(); // Você pode usar uma abordagem mais segura para o deslocamento
-                String encryptedSenha = Criptografia.encrypt(senha, shift);
-
+                // Enviar email e senha diretamente, sem criptografia
                 RequestBody requestBody = new okhttp3.FormBody.Builder()
                         .add("email", email)
-                        .add("senha", encryptedSenha)
+                        .add("senha", senha)
                         .build();
 
                 Request request = new Request.Builder()
@@ -100,29 +97,8 @@ public class Login extends AppCompatActivity {
                             runOnUiThread(() -> Toast.makeText(Login.this, "Erro ao fazer login: " + response.message(), Toast.LENGTH_SHORT).show());
                         }
                     }
-
-
                 });
-
             }
-
         });
-
-    }
-    public static class Criptografia {
-
-        public static String encrypt(String text, int shift) {
-            StringBuilder result = new StringBuilder();
-
-            for (char character : text.toCharArray()) {
-                if (Character.isLetter(character)) {
-                    char base = Character.isLowerCase(character) ? 'a' : 'A';
-                    character = (char) ((character - base + shift) % 26 + base);
-                }
-                result.append(character);
-            }
-            return result.toString();
-        }
-
     }
 }
