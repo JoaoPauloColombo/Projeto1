@@ -10,10 +10,14 @@ public class ApiClient {
     private static final OkHttpClient client = new OkHttpClient();
 
     public static void cadastrar(String nome, String email, String senha, Callback callback) {
+        // Criptografe a senha antes de enviar
+        int shift = senha.length(); // Você pode usar uma abordagem mais segura para o deslocamento
+        String encryptedSenha = Criptografia.encrypt(senha, shift);
+
         RequestBody requestBody = new okhttp3.FormBody.Builder()
                 .add("nome", nome)
                 .add("email", email)
-                .add("senha", senha)
+                .add("senha", encryptedSenha)
                 .build();
 
         Request request = new Request.Builder()
@@ -25,9 +29,13 @@ public class ApiClient {
     }
 
     public static void login(String email, String senha, Callback callback) {
+        // Criptografe a senha antes de enviar
+        int shift = senha.length(); // Você pode usar uma abordagem mais segura para o deslocamento
+        String encryptedSenha = Criptografia.encrypt(senha, shift);
+
         RequestBody requestBody = new okhttp3.FormBody.Builder()
                 .add("email", email)
-                .add("senha", senha)
+                .add("senha", encryptedSenha)
                 .build();
 
         Request request = new Request.Builder()
@@ -36,5 +44,22 @@ public class ApiClient {
                 .build();
 
         client.newCall(request).enqueue(callback);
+    }
+    public static class Criptografia {
+
+        // Método para criptografar
+        public static String encrypt(String text, int shift) {
+            StringBuilder result = new StringBuilder();
+
+            for (char character : text.toCharArray()) {
+                if (Character.isLetter(character)) {
+                    char base = Character.isLowerCase(character) ? 'a' : 'A';
+                    character = (char) ((character - base + shift) % 26 + base);
+                }
+                result.append(character);
+            }
+            return result.toString();
+        }
+
     }
 }

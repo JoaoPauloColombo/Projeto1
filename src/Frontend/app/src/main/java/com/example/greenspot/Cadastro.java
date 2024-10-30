@@ -49,9 +49,9 @@ public class Cadastro extends AppCompatActivity {
         cadastrarButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String nome = nomeEditText.getText().toString().replace("\n", "");
-                String email = emailEditText.getText().toString().replace("\n", "");
-                String senha = senhaEditText.getText().toString().replace("\n", "");
+                String nome = nomeEditText.getText().toString().trim();
+                String email = emailEditText.getText().toString().trim();
+                String senha = senhaEditText.getText().toString().trim();
 
                 if (nome.isEmpty() || email.isEmpty() || senha.isEmpty()) {
                     Toast.makeText(Cadastro.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
@@ -59,10 +59,6 @@ public class Cadastro extends AppCompatActivity {
                 }
 
                 cadastrar(nome, email, senha);
-
-                Intent intent = new Intent(Cadastro.this, Login.class);
-                startActivity(intent);
-                finish();
             }
         });
     }
@@ -74,7 +70,7 @@ public class Cadastro extends AppCompatActivity {
         // Crie um OkHttpClient com o CustomTrustManager
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
-        System.out.println("Valor de 'nome': " + nome);
+        // Não criptografe os dados, envie-os diretamente
         RequestBody requestBody = new okhttp3.FormBody.Builder()
                 .add("nome", nome)
                 .add("email", email)
@@ -86,64 +82,26 @@ public class Cadastro extends AppCompatActivity {
                 .post(requestBody)
                 .build();
 
-        System.out.println("URL: " + request.url());
-        System.out.println("Método: " + request.method());
-        System.out.println("Cabeçalhos: " + request.headers());
-        System.out.println("Corpo da requisição: " + requestBody.toString());
-
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
-                System.out.println("Erro ao cadastrar usuário: " + e.getMessage());
-                System.out.println("URL: " + call.request().url());
-                System.out.println("Método: " + call.request().method());
-                System.out.println("Cabeçalhos: " + call.request().headers());
-                System.out.println("Corpo da requisição: " + requestBody.toString());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(Cadastro.this, "Erro ao cadastrar usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                runOnUiThread(() -> Toast.makeText(Cadastro.this, "Erro ao cadastrar usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
 
             @Override
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
-                System.out.println("Resposta do servidor: " + response.code());
-                System.out.println("Cabeçalhos da resposta: " + response.headers());
-                System.out.println("Corpo da resposta: " + response.body().string());
                 if (response.isSuccessful()) {
-                    // ...
+                    // Cadastro bem-sucedido
+                    runOnUiThread(() -> {
+                        Toast.makeText(Cadastro.this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show();
+                        // Inicie a atividade de login
+                        Intent intent = new Intent(Cadastro.this, Login.class);
+                        startActivity(intent);
+                        finish();
+                    });
                 } else {
-                    if (response.code() == 400) {
-                        try {
-                            String responseBody = response.body().string();
-                            System.out.println("Erro ao cadastrar usuário: " + responseBody);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(Cadastro.this, "Erro ao cadastrar usuário: " + responseBody, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } catch (IOException e) {
-                            System.out.println("Erro ao cadastrar usuário: " + e.getMessage());
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(Cadastro.this, "Erro ao cadastrar usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-
-                    } else {
-                        System.out.println("Erro ao cadastrar usuário: código de resposta " + response.code());
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(Cadastro.this, "Erro ao cadastrar usuário: código de resposta " + response.code(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
+                    String errorMessage = response.body() != null ? response.body().string() : "Erro desconhecido";
+                    runOnUiThread(() -> Toast.makeText(Cadastro.this, "Erro ao cadastrar usuário: " + errorMessage, Toast.LENGTH_SHORT).show());
                 }
             }
         });
