@@ -1,21 +1,6 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
-
-// Funções de criptografia
-const encrypt = (text, shift) => {
-  return text.split('').map(char => {
-    if (/[a-zA-Z]/.test(char)) {
-      const code = char.charCodeAt(0);
-      const base = code >= 97 ? 97 : 65; // 'a' ou 'A'
-      return String.fromCharCode(((code - base + shift) % 26) + base);
-    }
-    return char;
-  }).join('');
-};
-
-const decrypt = (text, shift) => {
-  return encrypt(text, 26 - shift);
-};
+const bcrypt = require('bcryptjs'); // Importando bcryptjs
 
 const UserController = {
   login: async (req, res) => {
@@ -29,16 +14,10 @@ const UserController = {
         return res.status(401).json({ msg: "Usuário não encontrado." });
       }
 
-      // Descriptografar a senha do banco de dados
-      const shift = user.senha.length; // Usando o comprimento da senha como deslocamento
-      const decryptedSenha = decrypt(user.senha, shift);
+      // Comparar a senha fornecida com a senha armazenada
+      const isPasswordValid = await bcrypt.compare(senha, user.senha);
 
-      // Log para ver a senha fornecida e a senha descriptografada
-      console.log(`Senha fornecida: ${senha}`);
-      console.log(`Senha descriptografada: ${decryptedSenha}`);
-
-      // Comparar a senha descriptografada com a senha fornecida
-      if (decryptedSenha !== senha) {
+      if (!isPasswordValid) {
         return res.status(401).json({ msg: "Senha incorreta." });
       }
 
@@ -55,30 +34,30 @@ const UserController = {
   create: async (req, res) => {
     try {
       let { nome, senha, email } = req.body;
-  
+
       // Remover espaços em branco desnecessários
       nome = nome.trim();
       senha = senha.trim();
       email = email.trim();
-  
+
       // Log para verificar os dados recebidos
       console.log(`Dados recebidos: Nome: ${nome}, Email: ${email}, Senha: ${senha}`);
-  
+
       // Verificar se a senha está vazia
       if (!senha) {
         return res.status(400).json({ msg: "Senha não pode ser vazia." });
       }
-  
+
       // Criptografar a senha antes de salvar
-      const shift = senha.length; // Usando o comprimento da senha como deslocamento
-      const encryptedSenha = encrypt(senha, shift);
-  
+      const saltRounds = 10; // Número de rounds para gerar o sal
+      const encryptedSenha = await bcrypt.hash(senha, saltRounds);
+
       // Log para ver a senha normal e a senha criptografada
       console.log(`Senha normal: ${senha}`);
       console.log(`Senha criptografada: ${encryptedSenha}`);
-  
+
       const userCriado = await User.create({ nome, senha: encryptedSenha, email });
-  
+
       return res.status(200).json({
         msg: "Usuário criado com sucesso!",
         user: userCriado,
@@ -105,13 +84,12 @@ const UserController = {
         });
       }
 
-      // Criptografar a nova senha antes de atualizar
-      const shift = senha.length; // Usando o comprimento da nova senha como deslocamento
-      const encryptedSenha = encrypt(senha, shift);
-
-      // Log para ver a nova senha e a senha criptografada
-      console.log(`Nova senha normal: ${senha}`);
-      console.log(`Nova senha criptografada: ${encryptedSenha}`);
+      // Criptografar a nova senha antes de atualizar, se fornecida
+      let encryptedSenha = userUpdate.senha; // Manter a senha atual se nenhuma nova for fornecida
+      if (senha) {
+        const saltRounds = 10; // Número de rounds para gerar o sal
+        encryptedSenha = await bcrypt.hash(senha.trim(), saltRounds);
+      }
 
       const updated = await userUpdate.update({
         nome,
@@ -145,6 +123,7 @@ const UserController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+
   getOne: async (req, res) => {
     try {
       const { id } = req.params;
@@ -153,11 +132,11 @@ const UserController = {
 
       if (usuarioEncontrado == null) {
         return res.status(404).json({
-          msg: "Usuario nao encontrado!",
+          msg: "Usuário não encontrado!",
         });
       }
       return res.status(200).json({
-        msg: "Usuario Encontrados",
+        msg: "Usuário encontrado",
         usuario: usuarioEncontrado,
       });
     } catch (error) {
@@ -165,6 +144,7 @@ const UserController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+
   delete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -173,13 +153,13 @@ const UserController = {
 
       if (userFinded == null) {
         return res.status(404).json({
-          msg: "user nao encontrado",
+          msg: "Usuário não encontrado",
         });
       }
       await userFinded.destroy();
 
       return res.status(200).json({
-        msg: "Usuario deletado com sucesso",
+        msg: "Usuário deletado com sucesso",
       });
     } catch (error) {
       console.error(error);
