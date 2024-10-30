@@ -6,24 +6,24 @@ const UserController = {
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
-
+  
       // Buscar usuário pelo email
       const user = await User.findOne({ where: { email } });
-
+  
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
       }
-
+  
       // Comparar a senha fornecida com a senha armazenada
       const isPasswordValid = await bcrypt.compare(senha, user.senha);
-
+  
       if (!isPasswordValid) {
         return res.status(401).json({ msg: "Senha incorreta." });
       }
-
+  
       // Gerar token JWT
       const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
-
+  
       return res.status(200).json({ msg: "Login realizado", token });
     } catch (error) {
       console.error("Erro ao fazer login:", error);
