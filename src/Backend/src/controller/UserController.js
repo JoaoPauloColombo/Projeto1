@@ -1,27 +1,24 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs'); // Importando bcryptjs
+const bcrypt = require('bcryptjs');
 
 const UserController = {
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
   
-      // Buscar usuário pelo email
       const user = await User.findOne({ where: { email } });
   
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
       }
   
-      // Comparar a senha fornecida com a senha armazenada
       const isPasswordValid = await bcrypt.compare(senha, user.senha);
   
       if (!isPasswordValid) {
         return res.status(401).json({ msg: "Senha incorreta." });
       }
   
-      // Gerar token JWT
       const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
   
       return res.status(200).json({ msg: "Login realizado", token });
@@ -35,24 +32,19 @@ const UserController = {
     try {
       let { nome, senha, email } = req.body;
 
-      // Remover espaços em branco desnecessários
       nome = nome.trim();
       senha = senha.trim();
       email = email.trim();
 
-      // Log para verificar os dados recebidos
       console.log(`Dados recebidos: Nome: ${nome}, Email: ${email}, Senha: ${senha}`);
 
-      // Verificar se a senha está vazia
       if (!senha) {
         return res.status(400).json({ msg: "Senha não pode ser vazia." });
       }
 
-      // Criptografar a senha antes de salvar
-      const saltRounds = 10; // Número de rounds para gerar o sal
+      const saltRounds = 10;
       const encryptedSenha = await bcrypt.hash(senha, saltRounds);
 
-      // Log para ver a senha normal e a senha criptografada
       console.log(`Senha normal: ${senha}`);
       console.log(`Senha criptografada: ${encryptedSenha}`);
 
@@ -84,16 +76,15 @@ const UserController = {
         });
       }
 
-      // Criptografar a nova senha antes de atualizar, se fornecida
-      let encryptedSenha = userUpdate.senha; // Manter a senha atual se nenhuma nova for fornecida
+      let encryptedSenha = userUpdate.senha;
       if (senha) {
-        const saltRounds = 10; // Número de rounds para gerar o sal
+        const saltRounds = 10;
         encryptedSenha = await bcrypt.hash(senha.trim(), saltRounds);
       }
 
       const updated = await userUpdate.update({
         nome,
-        senha: encryptedSenha, // Atualizando a senha criptografada
+        senha: encryptedSenha,
         email,
       });
 
