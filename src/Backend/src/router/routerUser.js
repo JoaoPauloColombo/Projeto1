@@ -1,24 +1,27 @@
-const express = require('express');
-const router = express.Router();
-const UserController = require('../controller/UserController');
-const { validateUser , validateUserId } = require('../middlewares/ValidateUser');
+const {Router} = require("express");
+const UserController = require("../controller/UserController");
+const { validateUser, validateUserId } = require("../middlewares/ValidateUser");
 
-// Rota para criar um usuário
-router.post('/create', validateUser , UserController.create);
+const router = Router();
 
-// Rota para login
-router.post('/login', UserController.login);
+router.post('/', validateUser ,(req,res) => {
+    UserController.create(req,res)
+});
+router.put('/:id',validateUser,validateUserId,(req,res) => {
+    UserController.update(req,res)
+});
+router.get('/',(req,res) => {
+    UserController.getAll(req,res)
+});
+router.get('/:id',validateUserId,(req,res) => {
+    UserController.getOne(req,res)
+});
+router.delete('/:id',validateUserId,(req,res) => {
+    UserController.delete(req,res)
+});
 
-// Rota para atualizar um usuário
-router.put('/update/:id', validateUserId, UserController.update);
-
-// Rota para obter todos os usuários
-router.get('/', UserController.getAll);
-
-// Rota para obter um usuário específico
-router.get('/:id', validateUserId, UserController.getOne);
-
-// Rota para deletar um usuário
-router.delete('/:id', validateUserId, UserController.delete);
-
+router.post('/login', (req, res) => {
+    UserController.login(req, res)
+  });
+  
 module.exports = router;
