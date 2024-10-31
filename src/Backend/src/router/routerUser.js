@@ -23,8 +23,7 @@ function cifraDeCesarDescriptografar(texto, deslocamento) {
     return resultado;
 }
 
-// Rota de cadastro de usuário
-router.post('/', validateUser , (req, res) => {
+router.post('/', validateUser  , (req, res) => {
     console.log('Corpo da requisição:', req.body); // Log para depuração
 
     // Verifique se o corpo da requisição está definido
@@ -36,6 +35,13 @@ router.post('/', validateUser , (req, res) => {
     const nomeDescriptografado = cifraDeCesarDescriptografar(req.body.nome, 3);
     const emailDescriptografado = cifraDeCesarDescriptografar(req.body.email, 3);
     const senhaDescriptografada = cifraDeCesarDescriptografar(req.body.senha, 3);
+
+    // Log dos dados descriptografados
+    console.log('Dados descriptografados:', {
+        nome: nomeDescriptografado,
+        email: emailDescriptografado,
+        senha: senhaDescriptografada
+    });
 
     // Cria um novo objeto com os dados descriptografados
     const usuarioDescriptografado = {
