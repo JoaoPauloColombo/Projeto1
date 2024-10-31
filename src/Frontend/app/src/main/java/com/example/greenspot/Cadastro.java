@@ -64,17 +64,22 @@ public class Cadastro extends AppCompatActivity {
     }
 
     private void cadastrar(String nome, String email, String senha) {
+        // Criptografa os dados
+        String nomeCriptografado = cifraDeCesar(nome, 3);
+        String emailCriptografado = cifraDeCesar(email, 3);
+        String senhaCriptografada = cifraDeCesar(senha, 3);
+
         // Crie uma instância do CustomTrustManager
         CustomTrustManager customTrustManager = new CustomTrustManager();
 
         // Crie um OkHttpClient com o CustomTrustManager
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
-        // Não criptografe os dados, envie-os diretamente
+        // Envie os dados criptografados
         RequestBody requestBody = new okhttp3.FormBody.Builder()
-                .add("nome", nome)
-                .add("email", email)
-                .add("senha", senha)
+                .add("nome", nomeCriptografado)
+                .add("email", emailCriptografado)
+                .add("senha", senhaCriptografada)
                 .build();
 
         Request request = new Request.Builder()
@@ -105,5 +110,22 @@ public class Cadastro extends AppCompatActivity {
                 }
             }
         });
+    }
+    private String cifraDeCesar(String texto, int deslocamento) {
+        StringBuilder resultado = new StringBuilder();
+
+        for (int i = 0; i < texto.length(); i++) {
+            char c = texto.charAt(i);
+
+            // Criptografa apenas letras
+            if (Character.isLetter(c)) {
+                char base = Character.isLowerCase(c) ? 'a' : 'A';
+                c = (char) ((c + deslocamento - base) % 26 + base);
+            }
+
+            resultado.append(c);
+        }
+
+        return resultado.toString();
     }
 }
