@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const UserController = require("../controller/UserController");
-const { validateUser , validateUserId } = require("../middlewares/ValidateUser ");
+const { validateUser  , validateUserId } = require("../middlewares/ValidateUser ");
 
 const router = Router();
 
@@ -24,7 +24,7 @@ function cifraDeCesarDescriptografar(texto, deslocamento) {
 }
 
 // Rota de cadastro de usuário
-router.post('/', validateUser , (req, res) => {
+router.post('/', validateUser  , (req, res) => {
     // Descriptografa os dados recebidos
     const nomeDescriptografado = cifraDeCesarDescriptografar(req.body.nome, 3); // Deslocamento de 3
     const emailDescriptografado = cifraDeCesarDescriptografar(req.body.email, 3);
@@ -32,7 +32,6 @@ router.post('/', validateUser , (req, res) => {
 
     // Cria um novo objeto com os dados descriptografados
     const usuarioDescriptografado = {
-        ...req.body,
         nome: nomeDescriptografado,
         email: emailDescriptografado,
         senha: senhaDescriptografada,
@@ -43,7 +42,7 @@ router.post('/', validateUser , (req, res) => {
 });
 
 // Outras rotas
-router.put('/:id', validateUser , validateUserId, (req, res) => {
+router.put('/:id', validateUser  , validateUserId, (req, res) => {
     UserController.update(req, res);
 });
 router.get('/', (req, res) => {
