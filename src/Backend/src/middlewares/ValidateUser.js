@@ -1,3 +1,4 @@
+// Nome, email e senha
 const validateUser  = (req, res, next) => {
   console.log('Corpo da requisição no middleware:', req.body); // Log para depuração
 
@@ -23,3 +24,17 @@ const validateUser  = (req, res, next) => {
 
   return next();
 };
+
+const validateUserId = (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      msg: "Parâmetro faltando",
+    });
+  }
+
+  return next();
+};
+
+module.exports = { validateUser , validateUserId };
