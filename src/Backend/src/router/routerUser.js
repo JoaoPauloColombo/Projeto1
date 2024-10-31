@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const UserController = require("../controller/UserController");
-const { validateUser  , validateUserId } = require("../middlewares/ValidateUser");
+const { validateUser , validateUserId } = require("../middlewares/ValidateUser");
 
 const router = Router();
 
@@ -24,9 +24,16 @@ function cifraDeCesarDescriptografar(texto, deslocamento) {
 }
 
 // Rota de cadastro de usuário
-router.post('/', validateUser  , (req, res) => {
+router.post('/', validateUser , (req, res) => {
+    console.log('Corpo da requisição:', req.body); // Log para depuração
+
+    // Verifique se o corpo da requisição está definido
+    if (!req.body) {
+        return res.status(400).json({ error: "Corpo da requisição não pode estar vazio." });
+    }
+
     // Descriptografa os dados recebidos
-    const nomeDescriptografado = cifraDeCesarDescriptografar(req.body.nome, 3); // Deslocamento de 3
+    const nomeDescriptografado = cifraDeCesarDescriptografar(req.body.nome, 3);
     const emailDescriptografado = cifraDeCesarDescriptografar(req.body.email, 3);
     const senhaDescriptografada = cifraDeCesarDescriptografar(req.body.senha, 3);
 
@@ -42,15 +49,18 @@ router.post('/', validateUser  , (req, res) => {
 });
 
 // Outras rotas
-router.put('/:id', validateUser  , validateUserId, (req, res) => {
+router.put('/:id', validateUser , validateUserId, (req, res) => {
     UserController.update(req, res);
 });
+
 router.get('/', (req, res) => {
     UserController.getAll(req, res);
 });
+
 router.get('/:id', validateUserId, (req, res) => {
     UserController.getOne(req, res);
 });
+
 router.delete('/:id', validateUserId, (req, res) => {
     UserController.delete(req, res);
 });
