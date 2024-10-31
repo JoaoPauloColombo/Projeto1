@@ -29,9 +29,10 @@ const UserController = {
   },
 
   create: async (req, res) => {
+    console.log('Corpo da requisição no controlador:', req.body); // Adicione este log
+
     try {
       let { nome, senha, email } = req.body;
-
       nome = nome.trim();
       senha = senha.trim();
       email = email.trim();
