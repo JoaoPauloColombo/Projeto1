@@ -2,6 +2,7 @@ package com.example.greenspot;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,10 +65,16 @@ public class Cadastro extends AppCompatActivity {
     }
 
     private void cadastrar(String nome, String email, String senha) {
+        // Log dos dados antes da criptografia
+        Log.d("Cadastro", "Dados antes da criptografia: Nome: " + nome + ", Email: " + email + ", Senha: " + senha);
+
         // Criptografa os dados
         String nomeCriptografado = cifraDeCesar(nome, 3);
         String emailCriptografado = cifraDeCesar(email, 3);
         String senhaCriptografada = cifraDeCesar(senha, 3);
+
+        // Log dos dados criptografados
+        Log.d("Cadastro", "Dados criptografados: Nome: " + nomeCriptografado + ", Email: " + emailCriptografado + ", Senha: " + senhaCriptografada);
 
         // Crie uma instância do CustomTrustManager
         CustomTrustManager customTrustManager = new CustomTrustManager();
