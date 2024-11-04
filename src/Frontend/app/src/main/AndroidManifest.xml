@@ -19,25 +19,25 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="30">
         <activity
-            android:name=".Tutorial3"
+            android:name="br.fecap.pi.greenspot.Tutorial3"
             android:exported="true" />
         <activity
-            android:name=".Tutorial2"
+            android:name="br.fecap.pi.greenspot.Tutorial2"
             android:exported="true" />
         <activity
-            android:name=".Tutorial1"
+            android:name="br.fecap.pi.greenspot.Tutorial1"
             android:exported="true" />
         <activity
-            android:name=".Entrada"
+            android:name="br.fecap.pi.greenspot.Entrada"
             android:exported="true" />
         <activity
-            android:name=".MainActivity"
+            android:name="br.fecap.pi.greenspot.MainActivity"
             android:exported="true" />
         <activity
-            android:name=".Login"
+            android:name="br.fecap.pi.greenspot.Login"
             android:exported="true" />
         <activity
-            android:name=".Carregamento"
+            android:name="br.fecap.pi.greenspot.Carregamento"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,7 +46,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Cadastro"
+            android:name="br.fecap.pi.greenspot.Cadastro"
             android:exported="true" />
 
         <meta-data
