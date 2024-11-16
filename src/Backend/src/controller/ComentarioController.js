@@ -9,13 +9,16 @@ const ComentarioController = {
 
       const comentarioCriado = await Comentario.create({ descricao, nota, userId });
 
-      return res.status(200).json({
-        msg: "Comentario criado com sucesso!",
+      return res.status(201).json({
+        msg: "Comentário criado com sucesso!",
         comentario: comentarioCriado,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao criar comentário:", error);
+      return res.status(500).json({ 
+        msg: "Erro interno ao criar comentário. Acione o suporte.", 
+        error: error.message 
+      });
     }
   },
   
@@ -26,27 +29,28 @@ const ComentarioController = {
 
       const comentarioUpdate = await Comentario.findByPk(id);
 
-      if (comentarioUpdate == null) {
+      if (!comentarioUpdate) {
         return res.status(404).json({
-          msg: "Comentario nao encontrado",
+          msg: "Erro: Comentário não encontrado.",
         });
       }
 
+      // Atualiza apenas os campos que foram fornecidos
       const updated = await comentarioUpdate.update({
-        descricao, 
-        nota
+        descricao: descricao !== undefined ? descricao : comentarioUpdate.descricao,
+        nota: nota !== undefined ? nota : comentarioUpdate.nota,
       });
-      if (updated) {
-        return res.status(200).json({
-          msg: "Comentario atualizado com sucesso!",
-        });
-      }
-      return res.status(500).json({
-        msg: "Erro ao atualizar comentario"
+
+      return res.status(200).json({
+        msg: "Comentário atualizado com sucesso!",
+        comentario: updated,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao atualizar comentário:", error);
+      return res.status(500).json({ 
+        msg: "Erro interno ao atualizar comentário. Acione o suporte.", 
+        error: error.message 
+      });
     }
   },
   
@@ -59,12 +63,15 @@ const ComentarioController = {
         }]
       });
       return res.status(200).json({
-        msg: "Comentarios Encontrados!",
+        msg: "Comentários encontrados!",
         comentarios,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao buscar comentários:", error);
+      return res.status(500).json({ 
+        msg: "Erro interno ao buscar comentários. Acione o suporte.", 
+        error: error.message 
+      });
     }
   },
   
@@ -79,18 +86,21 @@ const ComentarioController = {
         }]
       });
 
-      if (comentarioEncontrado == null) {
+      if (!comentarioEncontrado) {
         return res.status(404).json({
-          msg: "Comentario nao encontrado!",
+          msg: "Erro: Comentário não encontrado!",
         });
       }
       return res.status(200).json({
-        msg: "Comentario Encontrado",
+        msg: "Comentário encontrado.",
         comentario: comentarioEncontrado,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao buscar comentário:", error);
+      return res.status(500).json({ 
+        msg: "Erro interno ao buscar comentário. Acione o suporte.", 
+        error: error.message 
+      });
     }
   },
   
@@ -100,19 +110,22 @@ const ComentarioController = {
 
       const comentarioFinded = await Comentario.findByPk(id);
 
-      if (comentarioFinded == null) {
+      if (!comentarioFinded) {
         return res.status(404).json({
-          msg: "Comentario nao encontrado",
+          msg: "Erro: Comentário não encontrado.",
         });
       }
       await comentarioFinded.destroy();
 
       return res.status(200).json({
-        msg: "Comentario deletado com sucesso",
+        msg: "Comentário deletado com sucesso.",
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao deletar comentário:", error);
+      return res.status(500).json({ 
+        msg: "Erro interno ao deletar comentário. Acione o suporte.", 
+        error: error.message 
+      });
     }
   },
 };

@@ -81,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d("MainActivity", "Resposta do servidor: " + responseBody);
 
                     try {
-                        JSONArray coordenadasArray = new JSONArray(responseBody); // Ajuste conforme a estrutura do JSON
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        JSONArray coordenadasArray = jsonObject.getJSONArray("coordenadas");
 
                         runOnUiThread(() -> {
                             for (int i = 0; i < coordenadasArray.length(); i++) {
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
+
     private void addMarkerToMap(double latitude, double longitude, String nome) {
         LatLng coordenada = new LatLng(latitude, longitude);
         gMap.addMarker(new MarkerOptions().position(coordenada).title(nome));
@@ -158,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void sendComentario(String pointName, String description, float rating, LinearLayout layoutComentarios) {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://projeto1-1vh9.onrender.com/api/comentario/"; // URL para enviar o comentário
+        String url = "https://projeto1-1vh9.onrender.com/api/comentario/";
 
         // Criar um JSON para enviar
         JSONObject comentarioJson = new JSONObject();
@@ -216,9 +218,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Adiciona o TextView ao layout
         layoutComentarios.addView(comentarioView);
     }
+
     private void fetchComentarios(String pointName, LinearLayout layoutComentarios) {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://projeto1-1vh9.onrender.com/api/comentario/"; // URL da sua API para obter comentários
+        String url = "https://projeto1-1vh9.onrender.com/api/comentario?pointName=" + pointName;
 
         client.newCall(new Request.Builder().url(url).build()).enqueue(new okhttp3.Callback() {
             @Override
@@ -233,17 +236,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseBody = response.body() != null ? response.body().string() : "";
-                    Log.d("MainActivity", "Resposta do servidor: " + responseBody); // Log da resposta
+                    Log.d("MainActivity", "Resposta do servidor: " + responseBody);
 
                     try {
-                        // Converter a resposta em JSONObject
                         JSONObject jsonObject = new JSONObject(responseBody);
-                        // Extrair o array de comentários
                         JSONArray jsonArray = jsonObject.getJSONArray("comentarios");
 
                         runOnUiThread(() -> {
                             layoutComentarios.removeAllViews(); // Limpa comentários anteriores
-                            displayComentarios(jsonArray, layoutComentarios, pointName);
+                            displayComentarios(jsonArray, layoutComentarios);
                         });
                     } catch (JSONException e) {
                         Log.e("MainActivity", "Erro ao processar os comentários: " + e.getMessage());
@@ -252,7 +253,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         });
                     }
                 } else {
-                    Log.e("MainActivity", "Erro ao buscar comentários: " + response.message());
+                    // Log adicional para resposta não bem-sucedida
+                    String errorBody = response.body() != null ? response.body().string() : "Corpo da resposta vazio";
+                    Log.e("MainActivity", "Erro ao buscar comentários: " + response.message() + " (Código: " + response.code() + ") - Corpo: " + errorBody);
                     runOnUiThread(() -> {
                         Toast.makeText(MainActivity.this, "Erro ao buscar comentários. Verifique o log para mais detalhes.", Toast.LENGTH_SHORT).show();
                     });
@@ -261,32 +264,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void displayComentarios(JSONArray comentarios, LinearLayout layoutComentarios, String pointName) {
-        // Verifica se há comentários a serem exibidos
+    private void displayComentarios(JSONArray comentarios, LinearLayout layoutComentarios) {
         if (comentarios.length() == 0) {
             Toast.makeText(this, "Nenhum comentário encontrado.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Adiciona cada comentário ao layout
         for (int i = 0; i < comentarios.length(); i++) {
             try {
                 JSONObject comentario = comentarios.getJSONObject(i);
-                String descricao = comentario.optString("descricao", "Descrição não disponível"); // Use optString para evitar JSONException
-                float nota = (float) comentario.optDouble("nota", 0.0); // Use optDouble para evitar JSONException
+                String descricao = comentario.optString("descricao", "Descrição não disponível");
+                float nota = (float) comentario.optDouble("nota", 0.0);
 
-                // Usando optString para evitar JSONException se a chave não existir
-                String comentarioPointName = comentario.optString("pointName", "");
-
-                if (comentarioPointName.equals(pointName)) {
-                    addComentarioToLayout(descricao, nota, layoutComentarios, pointName);
-                }
+                // Passando o nome do ecoponto como quarto parâmetro
+                addComentarioToLayout(descricao, nota, layoutComentarios, comentario.optString("nomeEcoponto", "Ecoponto desconhecido"));
             } catch (JSONException e) {
                 Log.e("MainActivity", "Erro ao processar comentário na posição " + i + ": " + e.getMessage());
-                int finalI = i;
-                runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this, "Erro ao processar comentário na posição " + finalI + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
             }
         }
     }
@@ -299,7 +292,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void mostrarComentariosDoEcoponto(String nomeEcoponto) {
         // Aqui você pode implementar a lógica para mostrar os comentários filtrados
-        // Por exemplo, você pode abrir um novo diálogo ou atualizar o layout existente
         Toast.makeText(this, "Mostrando comentários de: " + nomeEcoponto, Toast.LENGTH_SHORT).show();
         // Você pode chamar fetchComentarios aqui para obter os comentários desse ecoponto específico
     }
