@@ -6,7 +6,10 @@ const sequelize = require("./config/config");
 const Comentario = require("./models/Comentario");
 const User = require("./models/User");
 const routerUpload = require('./router/routerUpload');
+const Coordenadas = require("./models/Coordenadas");
+const Associations = require("./models/associations"); // Corrigido para 'associations'
 
+// Importando o CORS
 var cors = require('cors');
 
 const app = express();
@@ -34,6 +37,7 @@ app.get("/healthcheck", (req, res) => {
   });
 });
 
+// Autenticação e sincronização do banco de dados
 sequelize
   .authenticate()
   .then(async () => {
@@ -41,8 +45,8 @@ sequelize
     await sequelize.sync(); // Sincroniza o código com a tabela
   })
   .then(() => {
-    app.listen(process.env.PORT == null ? 8080 : process.env.PORT, () => {
-      console.log("Rodando na porta 8080");
+    app.listen(process.env.PORT || 8080, () => {
+      console.log(`Rodando na porta ${process.env.PORT || 8080}`);
     });
   })
   .catch((error) => { 
