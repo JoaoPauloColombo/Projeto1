@@ -2,6 +2,6 @@
 const Coordenadas = require('./Coordenadas');
 const Comentario = require('./Comentario');
 
-// Exemplo de associação
-Coordenadas.hasMany(Comentario, { foreignKey: 'coordenadaId' });
+// Definindo as associações
+Coordenadas.hasMany(Comentario, { foreignKey: 'coordenadaId', as: 'comentarios' });
 Comentario.belongsTo(Coordenadas, { foreignKey: 'coordenadaId' });

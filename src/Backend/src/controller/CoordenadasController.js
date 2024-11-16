@@ -13,8 +13,8 @@ const CoordenadasController = {
         coordenada: coordenadaCriada,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao criar coordenada:", error);
+      return res.status(500).json({ msg: "Erro ao criar coordenada. Acione o Suporte." });
     }
   },
   
@@ -25,30 +25,21 @@ const CoordenadasController = {
 
       const coordenadaUpdate = await Coordenadas.findByPk(id);
 
-      if (coordenadaUpdate == null) {
+      if (!coordenadaUpdate) {
         return res.status(404).json({
           msg: "Coordenada não encontrada",
         });
       }
 
-      const updated = await coordenadaUpdate.update({
-        latitude,
-        longitude,
-        nome
-      });
+      await coordenadaUpdate.update({ latitude, longitude, nome });
       
-      if (updated) {
-        return res.status(200).json({
-          msg: "Coordenada atualizada com sucesso!",
-        });
-      }
-
-      return res.status(500).json({
-        msg: "Erro ao atualizar coordenada"
+      return res.status(200).json({
+        msg: "Coordenada atualizada com sucesso!",
+        coordenada: coordenadaUpdate,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao atualizar coordenada:", error);
+      return res.status(500).json({ msg: "Erro ao atualizar coordenada. Acione o Suporte." });
     }
   },
   
@@ -57,6 +48,7 @@ const CoordenadasController = {
       const coordenadas = await Coordenadas.findAll({
         include: [{
           model: Comentario,
+          as: 'comentarios', // Certifique-se de que o alias está correto
           attributes: ['descricao', 'nota', 'userId'],
         }]
       });
@@ -65,8 +57,8 @@ const CoordenadasController = {
         coordenadas,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao buscar coordenadas:", error);
+      return res.status(500).json({ msg: "Erro ao buscar coordenadas. Acione o Suporte." });
     }
   },
   
@@ -77,11 +69,12 @@ const CoordenadasController = {
       const coordenadaEncontrada = await Coordenadas.findByPk(id, {
         include: [{
           model: Comentario,
+          as: 'comentarios', // Certifique-se de que o alias está correto
           attributes: ['descricao', 'nota', 'userId'],
         }]
       });
 
-      if (coordenadaEncontrada == null) {
+      if (!coordenadaEncontrada) {
         return res.status(404).json({
           msg: "Coordenada não encontrada!",
         });
@@ -91,8 +84,8 @@ const CoordenadasController = {
         coordenada: coordenadaEncontrada,
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao buscar coordenada:", error);
+      return res.status(500).json({ msg: "Erro ao buscar coordenada. Acione o Suporte." });
     }
   },
   
@@ -102,7 +95,7 @@ const CoordenadasController = {
 
       const coordenadaEncontrada = await Coordenadas.findByPk(id);
 
-      if (coordenadaEncontrada == null) {
+      if (!coordenadaEncontrada) {
         return res.status(404).json({
           msg: "Coordenada não encontrada",
         });
@@ -113,8 +106,8 @@ const CoordenadasController = {
         msg: "Coordenada deletada com sucesso",
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      console.error("Erro ao deletar coordenada:", error);
+      return res.status(500).json({ msg: "Erro ao deletar coordenada. Acione o Suporte." });
     }
   },
 };

@@ -1,36 +1,29 @@
+// src/models/Comentario.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
-const Coordenada = require("./Coordenadas");
-const User = require("./User");
 
 const Comentario = sequelize.define('comentario', {
-    descricao: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    nota: {
+    id: {
         type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false 
+    },
+    texto: {
+        type: DataTypes.STRING,
         allowNull: false
     },
     coordenadaId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
-            model: Coordenada,
-            key: 'id'
-        },
-        allowNull: false
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: User,
-            key: 'id' 
-        },
-        allowNull: false
+            model: 'coordenadas', // Nome da tabela
+            key: 'id' // Chave primária da tabela coordenadas
+        }
     }
+}, {
+    timestamps: true,
+    tableName: 'comentarios' // Nome da tabela no banco de dados
 });
-
-Comentario.belongsTo(Coordenada, { foreignKey: 'coordenadaId' });
-Comentario.belongsTo(User, { foreignKey: 'userId' });
 
 module.exports = Comentario;

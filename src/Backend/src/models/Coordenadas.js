@@ -1,4 +1,3 @@
-// src/models/Coordenadas.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
 
