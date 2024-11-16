@@ -53,11 +53,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull GoogleMap googleMap) {
         gMap = googleMap;
         gMap.setInfoWindowAdapter(this);
-
-        LatLng Astarte = new LatLng(-23.54926754847192, -46.52485532327169);
-        gMap.addMarker(new MarkerOptions().position(Astarte).title("Astarte EcoPonto"));
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Astarte, 12));
-
         gMap.setOnMarkerClickListener(this::onMarkerClick);
     }
 
@@ -68,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .url(BASE_URL)
                 .build();
 
+        Log.d("MainActivity", "Iniciando a busca de coordenadas...");
+
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
@@ -77,14 +74,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
+                Log.d("MainActivity", "Código de resposta: " + response.code());
                 if (response.isSuccessful()) {
                     assert response.body() != null;
                     String responseBody = response.body().string();
                     Log.d("MainActivity", "Resposta do servidor: " + responseBody);
 
                     try {
-                        JSONObject jsonResponse = new JSONObject(responseBody);
-                        JSONArray coordenadasArray = jsonResponse.getJSONArray("coordenadas");
+                        JSONArray coordenadasArray = new JSONArray(responseBody); // Ajuste conforme a estrutura do JSON
 
                         runOnUiThread(() -> {
                             for (int i = 0; i < coordenadasArray.length(); i++) {
@@ -94,8 +91,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     double longitude = coordenadaObject.getDouble("longitude");
                                     String nome = coordenadaObject.getString("nome");
 
-                                    LatLng coordenada = new LatLng(latitude, longitude);
-                                    gMap.addMarker(new MarkerOptions().position(coordenada).title(nome));
+                                    Log.d("MainActivity", "Adicionando marcador: " + nome + " - Lat: " + latitude + ", Lng: " + longitude);
+                                    addMarkerToMap(latitude, longitude, nome);
                                 } catch (JSONException e) {
                                     Log.e("MainActivity", "Erro ao parsear JSON: " + e.getMessage());
                                 }
@@ -106,11 +103,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         runOnUiThread(() -> Toast.makeText(MainActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show());
                     }
                 } else {
-                    Log.e("MainActivity", "Erro na resposta: " + response.code());
+                    String errorBody = response.body() != null ? response.body().string() : "Sem corpo de resposta";
+                    Log.e("MainActivity", "Erro na resposta: " + response.code() + " - " + errorBody);
                     runOnUiThread(() -> Toast.makeText(MainActivity.this, "Erro ao buscar coordenadas", Toast.LENGTH_SHORT).show());
                 }
             }
         });
+    }
+    private void addMarkerToMap(double latitude, double longitude, String nome) {
+        LatLng coordenada = new LatLng(latitude, longitude);
+        gMap.addMarker(new MarkerOptions().position(coordenada).title(nome));
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordenada, 12)); // Ajuste o zoom conforme necessário
     }
 
     @Override
@@ -213,7 +216,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Adiciona o TextView ao layout
         layoutComentarios.addView(comentarioView);
     }
-
     private void fetchComentarios(String pointName, LinearLayout layoutComentarios) {
         OkHttpClient client = new OkHttpClient();
         String url = "https://projeto1-1vh9.onrender.com/api/comentario/"; // URL da sua API para obter comentários
