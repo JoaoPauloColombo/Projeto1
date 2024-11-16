@@ -1,4 +1,5 @@
 const Coordenadas = require("../models/Coordenadas");
+const Comentario = require("../models/Comentario");
 
 const CoordenadasController = {
   create: async (req, res) => {
@@ -53,7 +54,12 @@ const CoordenadasController = {
   
   getAll: async (req, res) => {
     try {
-      const coordenadas = await Coordenadas.findAll();
+      const coordenadas = await Coordenadas.findAll({
+        include: [{
+          model: Comentario,
+          attributes: ['descricao', 'nota', 'userId'],
+        }]
+      });
       return res.status(200).json({
         msg: "Coordenadas encontradas!",
         coordenadas,
@@ -68,7 +74,12 @@ const CoordenadasController = {
     try {
       const { id } = req.params;
 
-      const coordenadaEncontrada = await Coordenadas.findByPk(id);
+      const coordenadaEncontrada = await Coordenadas.findByPk(id, {
+        include: [{
+          model: Comentario,
+          attributes: ['descricao', 'nota', 'userId'],
+        }]
+      });
 
       if (coordenadaEncontrada == null) {
         return res.status(404).json({

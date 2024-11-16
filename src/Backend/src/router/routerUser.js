@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const UserController = require("../controller/UserController");
-const { validateUser , validateUserId } = require("../middlewares/ValidateUser");
+const { validateUser, validateUserId } = require("../middlewares/ValidateUser");
 
 const router = Router();
 
@@ -10,31 +10,32 @@ function cifraDeCesarDescriptografar(texto, deslocamento) {
 
     for (let i = 0; i < texto.length; i++) {
         let c = texto.charAt(i);
-        
+
         // Descriptografa apenas letras
         if (/[a-zA-Z]/.test(c)) {
             let base = c >= 'a' && c <= 'z' ? 'a' : 'A';
             c = String.fromCharCode((c.charCodeAt(0) - deslocamento - base.charCodeAt(0) + 26) % 26 + base.charCodeAt(0));
         }
-        
+
         resultado += c;
     }
-    
+
     return resultado;
 }
 
-router.post('/', validateUser  , (req, res) => {
+router.post('/', validateUser, (req, res) => {
     console.log('Corpo da requisição:', req.body); // Log para depuração
 
-    // Verifique se o corpo da requisição está definido
-    if (!req.body) {
-        return res.status(400).json({ error: "Corpo da requisição não pode estar vazio." });
+    // Verifique se o corpo da requisição está definido e contém os campos necessários
+    const { nome, email, senha } = req.body;
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
     }
 
     // Descriptografa os dados recebidos
-    const nomeDescriptografado = cifraDeCesarDescriptografar(req.body.nome, 3);
-    const emailDescriptografado = cifraDeCesarDescriptografar(req.body.email, 3);
-    const senhaDescriptografada = cifraDeCesarDescriptografar(req.body.senha, 3);
+    const nomeDescriptografado = cifraDeCesarDescriptografar(nome, 3);
+    const emailDescriptografado = cifraDeCesarDescriptografar(email, 3);
+    const senhaDescriptografada = cifraDeCesarDescriptografar(senha, 3);
 
     // Log dos dados descriptografados
     console.log('Dados descriptografados:', {
@@ -55,7 +56,7 @@ router.post('/', validateUser  , (req, res) => {
 });
 
 // Outras rotas
-router.put('/:id', validateUser , validateUserId, (req, res) => {
+router.put('/:id', validateUser, validateUserId, (req, res) => {
     UserController.update(req, res);
 });
 

@@ -1,26 +1,27 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { Op } = require('sequelize');
 
 const UserController = {
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
-  
+
       const user = await User.findOne({ where: { email } });
-  
+
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
       }
-  
+
       const isPasswordValid = await bcrypt.compare(senha, user.senha);
-  
+
       if (!isPasswordValid) {
         return res.status(401).json({ msg: "Senha incorreta." });
       }
-  
-      const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
-  
+
+      const token = jwt.sign({ id: user.id, email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
+
       return res.status(200).json({ msg: "Login realizado", token });
     } catch (error) {
       console.error("Erro ao fazer login:", error);
@@ -28,33 +29,31 @@ const UserController = {
     }
   },
 
-  create: async (req, res, usuarioDescriptografado) => {
-    console.log('Corpo da requisição no controlador:', usuarioDescriptografado); // Adicione este log
-
+  create: async (req, res) => {
     try {
-      let { nome, senha, email } = usuarioDescriptografado;
+      let { nome, senha, email } = req.body;
 
       nome = nome.trim();
       senha = senha.trim();
       email = email.trim();
 
-      console.log(`Dados recebidos: Nome: ${nome}, Email: ${email}, Senha: ${senha}`);
-
-      if (!senha) {
-        return res.status(400).json({ msg: "Senha não pode ser vazia." });
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ msg: "Email já está em uso." });
       }
 
       const saltRounds = 10;
       const encryptedSenha = await bcrypt.hash(senha, saltRounds);
 
-      console.log(`Senha normal: ${senha}`);
-      console.log(`Senha criptografada: ${encryptedSenha}`);
-
       const userCriado = await User.create({ nome, senha: encryptedSenha, email });
 
-      return res.status(200).json({
+      return res.status(201).json({
         msg: "Usuário criado com sucesso!",
-        user: userCriado,
+        user: {
+          id: userCriado.id,
+          nome: userCriado.nome,
+          email: userCriado.email,
+        },
       });
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
@@ -67,9 +66,6 @@ const UserController = {
       const { id } = req.params;
       const { nome, senha, email } = req.body;
 
-      console.log({ id });
-      console.log({ nome, senha, email });
-
       const userUpdate = await User.findByPk(id);
 
       if (userUpdate == null) {
@@ -77,11 +73,21 @@ const UserController = {
           msg: "Usuário não encontrado",
         });
       }
-
-      let encryptedSenha = userUpdate.senha;
       if (senha) {
         const saltRounds = 10;
         encryptedSenha = await bcrypt.hash(senha.trim(), saltRounds);
+      }
+
+      
+      const existingUser = await User.findOne({
+        where: {
+          email,
+          id: { [Op.ne]: id } 
+        }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ msg: "Email já está em uso." });
       }
 
       const updated = await userUpdate.update({
@@ -93,6 +99,11 @@ const UserController = {
       if (updated) {
         return res.status(200).json({
           msg: "Usuário atualizado com sucesso!",
+          usuario: {
+            id: userUpdate.id,
+            nome: userUpdate.nome,
+            email: userUpdate.email,
+          },
         });
       }
       return res.status(500).json({
@@ -106,7 +117,9 @@ const UserController = {
 
   getAll: async (req, res) => {
     try {
-      const usuarios = await User.findAll();
+      const usuarios = await User.findAll({
+        attributes: { exclude: ['senha'] }
+      });
       return res.status(200).json({
         msg: "Usuários Encontrados!",
         usuarios,
@@ -121,7 +134,9 @@ const UserController = {
     try {
       const { id } = req.params;
 
-      const usuarioEncontrado = await User.findByPk(id);
+      const usuarioEncontrado = await User.findByPk(id, {
+        attributes: { exclude: ['senha'] }
+      });
 
       if (usuarioEncontrado == null) {
         return res.status(404).json({
@@ -130,7 +145,11 @@ const UserController = {
       }
       return res.status(200).json({
         msg: "Usuário encontrado",
-        usuario: usuarioEncontrado,
+        usuario: {
+          id: usuarioEncontrado.id,
+          nome: usuarioEncontrado.nome,
+          email: usuarioEncontrado.email,
+        },
       });
     } catch (error) {
       console.error(error);

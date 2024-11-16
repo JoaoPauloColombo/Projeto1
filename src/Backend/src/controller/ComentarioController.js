@@ -1,28 +1,28 @@
 const Comentario = require("../models/Comentario");
+const User = require("../models/User");
 
 const ComentarioController = {
   create: async (req, res) => {
     try {
-      const { nome, descricao, nota } = req.body;
+      const { descricao, nota } = req.body;
+      const userId = req.user.id;
 
-      const comentarioCriado = await Comentario.create({ nome, descricao, nota });
+      const comentarioCriado = await Comentario.create({ descricao, nota, userId });
 
       return res.status(200).json({
         msg: "Comentario criado com sucesso!",
-        user: comentarioCriado,
+        comentario: comentarioCriado,
       });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+  
   update: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nome, descricao, nota } = req.body;
-
-      console.log({ id });
-      console.log({ nome, descricao, nota });
+      const { descricao, nota } = req.body;
 
       const comentarioUpdate = await Comentario.findByPk(id);
 
@@ -33,7 +33,6 @@ const ComentarioController = {
       }
 
       const updated = await comentarioUpdate.update({
-        nome, 
         descricao, 
         nota
       });
@@ -42,17 +41,23 @@ const ComentarioController = {
           msg: "Comentario atualizado com sucesso!",
         });
       }
-    return res.status(500).json({
-        msg:"Erro ao atualizar comentario"
-    })
+      return res.status(500).json({
+        msg: "Erro ao atualizar comentario"
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+  
   getAll: async (req, res) => {
     try {
-      const comentarios = await Comentario.findAll();
+      const comentarios = await Comentario.findAll({
+        include: [{
+          model: User,
+          attributes: ['nome', 'email']
+        }]
+      });
       return res.status(200).json({
         msg: "Comentarios Encontrados!",
         comentarios,
@@ -62,11 +67,17 @@ const ComentarioController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+  
   getOne: async (req, res) => {
     try {
       const { id } = req.params;
 
-      const comentarioEncontrado = await Comentario.findByPk(id);
+      const comentarioEncontrado = await Comentario.findByPk(id, {
+        include: [{
+          model: User,
+          attributes: ['nome', 'email']
+        }]
+      });
 
       if (comentarioEncontrado == null) {
         return res.status(404).json({
@@ -74,14 +85,15 @@ const ComentarioController = {
         });
       }
       return res.status(200).json({
-        msg: "Comentario Encontrados",
-        usuario: comentarioEncontrado,
+        msg: "Comentario Encontrado",
+        comentario: comentarioEncontrado,
       });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+  
   delete: async (req, res) => {
     try {
       const { id } = req.params;
