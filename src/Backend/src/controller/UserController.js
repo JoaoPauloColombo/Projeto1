@@ -4,11 +4,17 @@ const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 
 const UserController = {
+  // Função para encontrar um usuário pelo email
+  findByEmail: async (email) => {
+    return await User.findOne({ where: { email } });
+  },
+
+  // Método para login
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
 
-      const user = await User.findOne({ where: { email } });
+      const user = await UserController.findByEmail(email); // Usando a função findByEmail
 
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
@@ -29,6 +35,7 @@ const UserController = {
     }
   },
 
+  // Método para criar um novo usuário
   create: async (req, res) => {
     try {
       let { nome, senha, email } = req.body;
@@ -37,8 +44,8 @@ const UserController = {
       senha = senha.trim();
       email = email.trim();
 
-      const existingUser = await User.findOne({ where: { email } });
-      if (existingUser) {
+      const existingUser  = await UserController.findByEmail(email); // Usando a função findByEmail
+      if (existingUser ) {
         return res.status(400).json({ msg: "Email já está em uso." });
       }
 
@@ -61,6 +68,7 @@ const UserController = {
     }
   },
 
+  // Método para atualizar um usuário
   update: async (req, res) => {
     try {
       const { id } = req.params;
@@ -73,26 +81,27 @@ const UserController = {
           msg: "Usuário não encontrado",
         });
       }
+
+      let encryptedSenha;
       if (senha) {
         const saltRounds = 10;
         encryptedSenha = await bcrypt.hash(senha.trim(), saltRounds);
       }
 
-      
-      const existingUser = await User.findOne({
+      const existingUser  = await User.findOne({
         where: {
           email,
-          id: { [Op.ne]: id } 
+          id: { [Op.ne]: id } // Verifica se o email já está em uso por outro usuário
         }
       });
 
-      if (existingUser) {
+      if (existingUser ) {
         return res.status(400).json({ msg: "Email já está em uso." });
       }
 
       const updated = await userUpdate.update({
         nome,
-        senha: encryptedSenha,
+        senha: encryptedSenha || userUpdate.senha, // Mantém a senha antiga se não for atualizada
         email,
       });
 
@@ -115,10 +124,11 @@ const UserController = {
     }
   },
 
+  // Método para obter todos os usuários
   getAll: async (req, res) => {
     try {
       const usuarios = await User.findAll({
-        attributes: { exclude: ['senha'] }
+        attributes: { exclude: ['senha'] } // Exclui a senha da resposta
       });
       return res.status(200).json({
         msg: "Usuários Encontrados!",
@@ -130,12 +140,13 @@ const UserController = {
     }
   },
 
+  // Método para obter um único usuário pelo ID
   getOne: async (req, res) => {
     try {
       const { id } = req.params;
 
       const usuarioEncontrado = await User.findByPk(id, {
-        attributes: { exclude: ['senha'] }
+        attributes: { exclude: ['senha'] } // Exclui a senha da resposta
       });
 
       if (usuarioEncontrado == null) {
@@ -157,6 +168,7 @@ const UserController = {
     }
   },
 
+  // Método para deletar um usuário
   delete: async (req, res) => {
     try {
       const { id } = req.params;
