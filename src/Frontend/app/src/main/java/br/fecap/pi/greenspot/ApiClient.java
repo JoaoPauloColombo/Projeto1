@@ -1,5 +1,13 @@
 package br.fecap.pi.greenspot;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import java.io.IOException;
+
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -45,8 +53,24 @@ public class ApiClient {
 
         client.newCall(request).enqueue(callback);
     }
-    public static class Criptografia {
 
+    public static void sendComentario(String pointName, String description, float rating, Callback callback) {
+        // Crie o corpo da requisição com os dados do comentário
+        RequestBody requestBody = new okhttp3.FormBody.Builder()
+                .add("nome", pointName)
+                .add("descricao", description)
+                .add("nota", String.valueOf((int) rating)) // A nota deve ser um inteiro
+                .build();
+
+        Request request = new Request.Builder()
+                .url(BASE_URL + "/comentario/") // URL da sua API para criar comentários
+                .post(requestBody)
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
+
+    public static class Criptografia {
         // Método para criptografar
         public static String encrypt(String text, int shift) {
             StringBuilder result = new StringBuilder();
@@ -60,6 +84,5 @@ public class ApiClient {
             }
             return result.toString();
         }
-
     }
 }

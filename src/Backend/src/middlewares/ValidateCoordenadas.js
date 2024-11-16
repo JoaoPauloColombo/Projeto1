@@ -1,10 +1,22 @@
 const validateCoordenadas = (req, res, next) => {
     const { latitude, longitude, nome } = req.body;
 
-    // Verifica se os campos estão presentes e se latitude e longitude são números
-    if (typeof latitude !== 'number' || typeof longitude !== 'number' || !nome) {
+    // Verifica se os campos estão presentes
+    if (latitude === undefined) {
         return res.status(400).json({
-            msg: "Campos inválidos: 'latitude', 'longitude' devem ser números e 'nome' não pode estar vazio.",
+            msg: "Campo 'latitude' é obrigatório.",
+        });
+    }
+
+    if (longitude === undefined) {
+        return res.status(400).json({
+            msg: "Campo 'longitude' é obrigatório.",
+        });
+    }
+
+    if (!nome) {
+        return res.status(400).json({
+            msg: "Campo 'nome' é obrigatório.",
         });
     }
 
