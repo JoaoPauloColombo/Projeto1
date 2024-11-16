@@ -9,8 +9,16 @@ const Comentario = sequelize.define('comentario', {
         primaryKey: true,
         allowNull: false 
     },
-    texto: {
+    descricao: {
         type: DataTypes.STRING,
+        allowNull: false
+    },
+    nota: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    userId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     coordenadaId: {
