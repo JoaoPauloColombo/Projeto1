@@ -1,3 +1,4 @@
+// src/models/Coordenadas.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
 
@@ -5,7 +6,8 @@ const Coordenadas = sequelize.define('coordenadas', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
+        allowNull: false 
     },
     latitude: {
         type: DataTypes.DOUBLE,
@@ -19,7 +21,9 @@ const Coordenadas = sequelize.define('coordenadas', {
         type: DataTypes.STRING,
         allowNull: false
     }
+}, {
+    timestamps: true, 
+    tableName: 'coordenadas' 
 });
-
 
 module.exports = Coordenadas;
