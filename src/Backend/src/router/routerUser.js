@@ -72,8 +72,34 @@ router.delete('/:id', validateUserId, (req, res) => {
     UserController.delete(req, res);
 });
 
-router.post('/login', (req, res) => {
-    UserController.login(req, res);
+router.post('/login', async (req, res) => {
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+        return res.status(400).json({ error: "Email e senha são obrigatórios." });
+    }
+
+    const emailDescriptografado = cifraDeCesarDescriptografar(email, 3);
+    const senhaDescriptografada = cifraDeCesarDescriptografar(senha, 3);
+
+    // Log dos dados descriptografados
+    console.log('Dados descriptografados para login:', {
+        email: emailDescriptografado,
+        senha: senhaDescriptografada
+    });
+
+    try {
+        const usuario = await UserController.findByEmail(emailDescriptografado);
+
+        if (!usuario || usuario.senha !== senhaDescriptografada) {
+            return res.status(401).json({ error: "Email ou senha incorretos." });
+        }
+
+        return res.status(200).json({ message: "Login bem-sucedido!", usuario });
+    } catch (error) {
+        console.error('Erro ao realizar login:', error);
+        return res.status(500).json({ error: "Erro interno do servidor." });
+    }
 });
 
 module.exports = router;

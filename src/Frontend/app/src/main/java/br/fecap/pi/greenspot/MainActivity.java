@@ -159,6 +159,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void sendComentario(String pointName, String description, float rating, LinearLayout layoutComentarios) {
+        // Verifica se os parâmetros são válidos
+        if (pointName == null || pointName.isEmpty() || description == null || description.isEmpty() || rating < 0) {
+            Toast.makeText(MainActivity.this, "Por favor, preencha todos os campos corretamente.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         OkHttpClient client = new OkHttpClient();
         String url = "https://projeto1-1vh9.onrender.com/api/comentario/";
 
@@ -168,13 +174,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             comentarioJson.put("nome", pointName);
             comentarioJson.put("descricao", description);
             comentarioJson.put("nota", rating);
+            Log.d("SendComentario", "JSON enviado: " + comentarioJson.toString());
         } catch (JSONException e) {
             e.printStackTrace();
+            Toast.makeText(MainActivity.this, "Erro ao criar JSON: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            return; // Retorna se houver erro ao criar o JSON
         }
+
+        RequestBody requestBody = RequestBody.create(comentarioJson.toString(), MediaType.get("application/json; charset=utf-8"));
 
         Request request = new Request.Builder()
                 .url(url)
-                .post(RequestBody.create(comentarioJson.toString(), MediaType.parse("application/json; charset=utf-8")))
+                .post(requestBody)
                 .build();
 
         client.newCall(request).enqueue(new okhttp3.Callback() {
@@ -194,6 +205,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         addComentarioToLayout(description, rating, layoutComentarios, pointName);
                     });
                 } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Erro desconhecido";
+                    Log.e("SendComentario", "Erro: " + response.code() + " - " + errorBody);
                     runOnUiThread(() -> {
                         Toast.makeText(MainActivity.this, "Erro ao enviar comentário: " + response.message(), Toast.LENGTH_SHORT).show();
                     });
