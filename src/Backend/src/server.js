@@ -7,7 +7,7 @@ const Comentario = require("./models/Comentario");
 const User = require("./models/User");
 const routerUpload = require('./router/routerUpload');
 const Coordenadas = require("./models/Coordenadas");
-const Associations = require("./models/associations"); // Corrigido para 'associations'
+const Associations = require("./models/Associations"); // Corrigido para 'associations'
 
 // Importando o CORS
 var cors = require('cors');
