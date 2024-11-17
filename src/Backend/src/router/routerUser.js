@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const UserController = require("../controller/UserController");
-const { validateUser, validateUserId } = require("../middlewares/ValidateUser ");
+const { validateUser, validateUserId } = require("../middlewares/ValidateUser");
 const bcrypt = require("bcrypt");
 
 const router = Router();
