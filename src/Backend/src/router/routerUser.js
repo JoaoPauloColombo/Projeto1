@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const UserController = require("../controller/UserController");
-const { validateUser, validateUserId } = require("../middlewares/ValidateUser");
+const { validateUser , validateUserId } = require("../middlewares/ValidateUser");
 
 const router = Router();
 
@@ -20,7 +20,7 @@ function cifraDeCesarDescriptografar(texto, deslocamento) {
     return resultado;
 }
 
-router.post('/', validateUser, (req, res) => {
+router.post('/', validateUser , (req, res) => {
     console.log('Corpo da requisição:', req.body); // Log para depuração
 
     // Verifique se o corpo da requisição está definido e contém os campos necessários
@@ -53,7 +53,7 @@ router.post('/', validateUser, (req, res) => {
 });
 
 // Outras rotas
-router.put('/:id', validateUser, validateUserId, (req, res) => {
+router.put('/:id', validateUser , validateUserId, (req, res) => {
     UserController.update(req, res);
 });
 
@@ -69,8 +69,27 @@ router.delete('/:id', validateUserId, (req, res) => {
     UserController.delete(req, res);
 });
 
+// Rota de login com descriptografia
 router.post('/login', (req, res) => {
-    UserController.login(req, res);
+    console.log('Corpo da requisição de login:', req.body); // Log para depuração
+
+    const { email, senha } = req.body;
+    if (!email || !senha) {
+        return res.status(400).json({ error: "Email e senha são obrigatórios." });
+    }
+
+    // Descriptografa os dados recebidos no login
+    const emailDescriptografado = cifraDeCesarDescriptografar(email, 3);
+    const senhaDescriptografada = cifraDeCesarDescriptografar(senha, 3);
+
+    // Log dos dados descriptografados
+    console.log('Dados descriptografados para login:', {
+        email: emailDescriptografado,
+        senha: senhaDescriptografada
+    });
+
+    // Passa os dados descriptografados para o UserController
+    UserController.login(req, res, { email: emailDescriptografado, senha: senhaDescriptografada });
 });
 
 module.exports = router;
