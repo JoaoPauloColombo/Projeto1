@@ -4,20 +4,25 @@ const { validateUser , validateUserId } = require("../middlewares/ValidateUser")
 
 const router = Router();
 
-// Função de descriptografia da cifra de César
-function cifraDeCesarDescriptografar(texto, deslocamento) {
+// Função de criptografia da cifra de César
+function cifraDeCesar(texto, deslocamento) {
     let resultado = '';
 
     for (let i = 0; i < texto.length; i++) {
         let c = texto.charAt(i);
-        // Descriptografa apenas letras
+        // Criptografa apenas letras
         if (/[a-zA-Z]/.test(c)) {
             let base = c >= 'a' && c <= 'z' ? 'a' : 'A';
-            c = String.fromCharCode((c.charCodeAt(0) - deslocamento - base.charCodeAt(0) + 26) % 26 + base.charCodeAt(0));
+            c = String.fromCharCode((c.charCodeAt(0) + deslocamento - base.charCodeAt(0)) % 26 + base.charCodeAt(0));
         }
         resultado += c;
     }
     return resultado;
+}
+
+// Função de descriptografia da cifra de César
+function cifraDeCesarDescriptografar(texto, deslocamento) {
+    return cifraDeCesar(texto, -deslocamento); // Inverte o deslocamento para descriptografar
 }
 
 router.post('/', validateUser , (req, res) => {
@@ -29,27 +34,20 @@ router.post('/', validateUser , (req, res) => {
         return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
     }
 
-    // Descriptografa os dados recebidos
-    const nomeDescriptografado = cifraDeCesarDescriptografar(nome, 3);
-    const emailDescriptografado = cifraDeCesarDescriptografar(email, 3);
-    const senhaDescriptografada = cifraDeCesarDescriptografar(senha, 3);
+    // Criptografa os dados recebidos
+    const nomeCriptografado = cifraDeCesar(nome, 3);
+    const emailCriptografado = cifraDeCesar(email, 3);
+    const senhaCriptografada = cifraDeCesar(senha, 3);
 
-    // Log dos dados descriptografados
-    console.log('Dados descriptografados:', {
-        nome: nomeDescriptografado,
-        email: emailDescriptografado,
-        senha: senhaDescriptografada
-    });
-
-    // Cria um novo objeto com os dados descriptografados
-    const usuarioDescriptografado = {
-        nome: nomeDescriptografado,
-        email: emailDescriptografado,
-        senha: senhaDescriptografada,
+    // Cria um novo objeto com os dados criptografados
+    const usuarioCriptografado = {
+        nome: nomeCriptografado,
+        email: emailCriptografado,
+        senha: senhaCriptografada,
     };
 
-    // Passa os dados descriptografados para o UserController
-    UserController.create(req, res, usuarioDescriptografado);
+    // Passa os dados criptografados para o UserController
+    UserController.create(req, res, usuarioCriptografado);
 });
 
 // Outras rotas
@@ -88,7 +86,7 @@ router.post('/login', (req, res) => {
         senha: senhaDescriptografada
     });
 
-    // Passa os dados descriptografados para o UserController
+    // Passa os dados descriptografados para o UserController para verificar o login
     UserController.login(req, res, { email: emailDescriptografado, senha: senhaDescriptografada });
 });
 
