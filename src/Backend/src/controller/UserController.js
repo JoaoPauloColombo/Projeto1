@@ -9,18 +9,39 @@ const UserController = {
     return await User.findOne({ where: { email } });
   },
 
-  // Método para login
+  cifraDeCesarDescriptografar(texto, deslocamento) {
+    let resultado = '';
+
+    for (let i = 0; i < texto.length; i++) {
+      let c = texto.charAt(i);
+      // Descriptografa apenas letras
+      if (/[a-zA-Z]/.test(c)) {
+        let base = c >= 'a' && c <= 'z' ? 'a' : 'A';
+        c = String.fromCharCode((c.charCodeAt(0) - deslocamento - base.charCodeAt(0) + 26) % 26 + base.charCodeAt(0));
+      }
+      resultado += c;
+    }
+    return resultado;
+  },
+
+  // Método de login
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
 
-      const user = await UserController.findByEmail(email); // Usando a função findByEmail
+      // Descriptografa o email e a senha recebidos
+      const emailDescriptografado = this.cifraDeCesarDescriptografar(email, 3);
+      const senhaDescriptografada = this.cifraDeCesarDescriptografar(senha, 3);
+
+      // Busca o usuário pelo email descriptografado
+      const user = await UserController.findByEmail(emailDescriptografado);
 
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
       }
 
-      const isPasswordValid = await bcrypt.compare(senha, user.senha);
+      // Verifica se a senha descriptografada é válida
+      const isPasswordValid = await bcrypt.compare(senhaDescriptografada, user.senha);
 
       if (!isPasswordValid) {
         return res.status(401).json({ msg: "Senha incorreta." });
