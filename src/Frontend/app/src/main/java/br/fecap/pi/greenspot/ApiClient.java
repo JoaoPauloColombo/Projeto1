@@ -1,13 +1,5 @@
 package br.fecap.pi.greenspot;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-
-import java.io.IOException;
-
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
