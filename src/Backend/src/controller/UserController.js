@@ -9,6 +9,7 @@ const UserController = {
     return await User.findOne({ where: { email } });
   },
 
+  // Função de descriptografia da cifra de César
   cifraDeCesarDescriptografar(texto, deslocamento) {
     let resultado = '';
 
@@ -30,8 +31,8 @@ const UserController = {
       const { email, senha } = req.body;
 
       // Descriptografa o email e a senha recebidos
-      const emailDescriptografado = this.cifraDeCesarDescriptografar(email, 3);
-      const senhaDescriptografada = this.cifraDeCesarDescriptografar(senha, 3);
+      const emailDescriptografado = UserController.cifraDeCesarDescriptografar(email, 3);
+      const senhaDescriptografada = UserController.cifraDeCesarDescriptografar(senha, 3);
 
       // Busca o usuário pelo email descriptografado
       const user = await UserController.findByEmail(emailDescriptografado);
@@ -65,7 +66,7 @@ const UserController = {
       senha = senha.trim();
       email = email.trim();
 
-      const existingUser  = await UserController.findByEmail(email); // Usando a função findByEmail
+      const existingUser   = await UserController.findByEmail(email); // Usando a função findByEmail
       if (existingUser ) {
         return res.status(400).json({ msg: "Email já está em uso." });
       }
