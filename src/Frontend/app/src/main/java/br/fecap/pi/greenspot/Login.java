@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import br.fecap.pi.greenspot.R;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
