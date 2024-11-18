@@ -1,21 +1,18 @@
-const validateUser = (req, res, next) => {
+const validateUser  = (req, res, next) => {
   const { nome, email, senha } = req.body;
 
-  console.log('Valor do campo "nome":', nome);
-
-  if (!nome) {
+  if (!nome || typeof nome !== 'string') {
     return res.status(400).json({
-      msg: "O campo 'nome' é obrigatório.",
+      msg: "O campo 'nome' é obrigatório e deve ser uma string.",
     });
   }
 
-  if (!email) {
+  if (!email || typeof email !== 'string') {
     return res.status(400).json({
-      msg: "O campo 'email' é obrigatório.",
+      msg: "O campo 'email' é obrigatório e deve ser uma string.",
     });
   }
 
-  // Verificação de formato de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -23,13 +20,12 @@ const validateUser = (req, res, next) => {
     });
   }
 
-  if (!senha) {
+  if (!senha || typeof senha !== 'string') {
     return res.status(400).json({
-      msg: "O campo 'senha' é obrigatório.",
+      msg: "O campo 'senha' é obrigatório e deve ser uma string.",
     });
   }
 
-  // Verificação de comprimento da senha
   if (senha.length < 6) {
     return res.status(400).json({
       msg: "A senha deve ter pelo menos 6 caracteres.",
@@ -43,9 +39,10 @@ const validateUserId = (req, res, next) => {
   const { id } = req.params;
 
   if (!id) {
-    return res.status(400).json({
-      msg: "Parâmetro 'id' faltando.",
-    });
+      return res.status(400).json({ msg: "Parâmetro 'id' faltando." });
+  }
+  if (isNaN(id) || Number(id) <= 0) {
+      return res.status(400).json({ msg: "Parâmetro 'id' deve ser um número positivo." });
   }
 
   return next();
