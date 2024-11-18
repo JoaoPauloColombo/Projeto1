@@ -3,6 +3,25 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 
+// Função para criptografar o email (exemplo simples)
+const cifraDeCesar = (texto, deslocamento) => {
+  let resultado = '';
+  for (let i = 0; i < texto.length; i++) {
+    let c = texto.charAt(i);
+    if (/[a-zA-Z]/.test(c)) {
+      let base = c >= 'a' && c <= 'z' ? 'a' : 'A';
+      c = String.fromCharCode((c.charCodeAt(0) + deslocamento - base.charCodeAt(0)) % 26 + base.charCodeAt(0));
+    }
+    resultado += c;
+  }
+  return resultado;
+};
+
+// Função para descriptografar o email
+const cifraDeCesarDescriptografar = (texto, deslocamento) => {
+  return cifraDeCesar(texto, -deslocamento);
+};
+
 const UserController = {
   // Função para encontrar um usuário pelo email
   findByEmail: async (email) => {
@@ -10,13 +29,15 @@ const UserController = {
   },
 
   // Método de login
-  // Método de login
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
 
-      // Busca o usuário pelo email fornecido (sem descriptografar)
-      const user = await UserController.findByEmail(email);
+      // Descriptografa o email recebido
+      const emailDescriptografado = cifraDeCesarDescriptografar(email, 3);
+
+      // Busca o usuário pelo email descriptografado
+      const user = await UserController.findByEmail(emailDescriptografado);
 
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });
@@ -39,7 +60,6 @@ const UserController = {
   },
 
   // Método para criar um novo usuário
-  // Método para criar um novo usuário
   create: async (req, res) => {
     try {
       let { nome, senha, email } = req.body;
@@ -48,15 +68,18 @@ const UserController = {
       senha = senha.trim();
       email = email.trim();
 
-      const existingUser = await UserController.findByEmail(email);
-      if (existingUser) {
+      // Criptografa o email antes de armazenar
+      const emailCriptografado = cifraDeCesar(email, 3);
+
+      const existingUser  = await UserController.findByEmail(emailCriptografado);
+      if (existingUser ) {
         return res.status(400).json({ msg: "Email já está em uso." });
       }
 
       const saltRounds = 10;
       const encryptedSenha = await bcrypt.hash(senha, saltRounds);
 
-      const userCriado = await User.create({ nome, senha: encryptedSenha, email });
+      const userCriado = await User.create({ nome, senha: encryptedSenha, email: emailCriptografado });
 
       return res.status(201).json({
         msg: "Usuário criado com sucesso!",
@@ -71,7 +94,6 @@ const UserController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-
   // Método para atualizar um usuário
   update: async (req, res) => {
     try {
