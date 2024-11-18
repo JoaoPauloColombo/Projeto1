@@ -10,11 +10,12 @@ const UserController = {
   },
 
   // Método de login
+  // Método de login
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
 
-      // Busca o usuário pelo email
+      // Busca o usuário pelo email fornecido (sem descriptografar)
       const user = await UserController.findByEmail(email);
 
       if (!user) {
@@ -38,6 +39,7 @@ const UserController = {
   },
 
   // Método para criar um novo usuário
+  // Método para criar um novo usuário
   create: async (req, res) => {
     try {
       let { nome, senha, email } = req.body;
@@ -46,8 +48,8 @@ const UserController = {
       senha = senha.trim();
       email = email.trim();
 
-      const existingUser  = await UserController.findByEmail(email);
-      if (existingUser ) {
+      const existingUser = await UserController.findByEmail(email);
+      if (existingUser) {
         return res.status(400).json({ msg: "Email já está em uso." });
       }
 
@@ -90,14 +92,14 @@ const UserController = {
         encryptedSenha = await bcrypt.hash(senha.trim(), saltRounds);
       }
 
-      const existingUser  = await User.findOne({
+      const existingUser = await User.findOne({
         where: {
           email,
           id: { [Op.ne]: id } // Verifica se o email já está em uso por outro usuário
         }
       });
 
-      if (existingUser ) {
+      if (existingUser) {
         return res.status(400).json({ msg: "Email já está em uso." });
       }
 
