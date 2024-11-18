@@ -7,7 +7,11 @@ const UserController = {
     try {
       const { email, senha } = req.body;
   
+      console.log(`Tentando fazer login com o email: ${email}`);
+  
       const user = await User.findOne({ where: { email } });
+  
+      console.log(`Usuário encontrado: ${JSON.stringify(user)}`);
   
       if (!user) {
         return res.status(401).json({ msg: "Usuário não encontrado." });

@@ -24,14 +24,12 @@ function cifraDeCesarDescriptografar(texto, deslocamento) {
 }
 
 router.post('/', validateUser  , (req, res) => {
-    console.log('Corpo da requisição:', req.body); // Log para depuração
+    console.log('Corpo da requisição:', req.body);
 
-    // Verifique se o corpo da requisição está definido
     if (!req.body) {
         return res.status(400).json({ error: "Corpo da requisição não pode estar vazio." });
     }
 
-    // Descriptografa os dados recebidos
     const nomeDescriptografado = cifraDeCesarDescriptografar(req.body.nome, 3);
     const emailDescriptografado = cifraDeCesarDescriptografar(req.body.email, 3);
     const senhaDescriptografada = cifraDeCesarDescriptografar(req.body.senha, 3);
