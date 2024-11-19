@@ -55,7 +55,7 @@ public class Login extends AppCompatActivity {
                         .build();
 
                 Request request = new Request.Builder()
-                        .url("https://projeto1-1vh9.onrender.com/api/user/login")
+                        .url("https://projeto1-1vh9.onrender.com/api/users/login")
                         .post(requestBody)
                         .build();
 
