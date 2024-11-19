@@ -21,7 +21,7 @@ public class ApiClient {
                 .build();
 
         Request request = new Request.Builder()
-                .url(BASE_URL + "/user")
+                .url(BASE_URL + "/users")
                 .post(requestBody)
                 .build();
 
@@ -39,7 +39,7 @@ public class ApiClient {
                 .build();
 
         Request request = new Request.Builder()
-                .url(BASE_URL + "/user/login")
+                .url(BASE_URL + "/users/login")
                 .post(requestBody)
                 .build();
 
@@ -55,7 +55,7 @@ public class ApiClient {
                 .build();
 
         Request request = new Request.Builder()
-                .url(BASE_URL + "/comentario/") // URL da sua API para criar comentários
+                .url(BASE_URL + "/comentarios/") // URL da sua API para criar comentários
                 .post(requestBody)
                 .build();
 
