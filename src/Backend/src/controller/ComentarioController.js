@@ -4,12 +4,16 @@ const User = require("../models/User");
 const ComentarioController = {
   create: async (req, res) => {
     try {
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ msg: "Usuário não autenticado." });
+      }
+  
       console.log("ID do usuário:", req.user.id);
       const { descricao, nota } = req.body;
       const userId = req.user.id;
-
+  
       const comentarioCriado = await Comentario.create({ descricao, nota, userId });
-
+  
       return res.status(201).json({
         msg: "Comentário criado com sucesso!",
         comentario: comentarioCriado,

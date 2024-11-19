@@ -6,11 +6,12 @@ const uploadRoutes = require('./routerUpload');
 
 const router = Router();
 
-router.use('/comentario', comentarioRoutes);
+// Rotas para os recursos
+router.use('/comentarios', comentarioRoutes);
 
-router.use('/image', uploadRoutes);
+router.use('/images', uploadRoutes);
 
-router.use('/user',userRoutes);
+router.use('/users', userRoutes);
 
 router.use('/coordenadas', coordenadasRoutes);
 
