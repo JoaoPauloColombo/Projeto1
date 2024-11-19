@@ -91,7 +91,7 @@ public class Cadastro extends AppCompatActivity {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://projeto1-1vh9.onrender.com/api/user")
+                .url("https://projeto1-1vh9.onrender.com/api/users")
                 .post(requestBody)
                 .build();
 

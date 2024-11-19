@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         OkHttpClient client = new OkHttpClient();
-        String url = "https://projeto1-1vh9.onrender.com/api/comentario/";
+        String url = "https://projeto1-1vh9.onrender.com/api/comentarios/";
 
         // Criar um JSON para enviar
         JSONObject comentarioJson = new JSONObject();
