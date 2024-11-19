@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void fetchComentarios(String pointName, LinearLayout layoutComentarios) {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://projeto1-1vh9.onrender.com/api/comentario?pointName=" + pointName;
+        String url = "https://projeto1-1vh9.onrender.com/api/comentarios?pointName=" + pointName;
 
         client.newCall(new Request.Builder().url(url).build()).enqueue(new okhttp3.Callback() {
             @Override
