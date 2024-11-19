@@ -4,6 +4,7 @@ const User = require("../models/User");
 const ComentarioController = {
   create: async (req, res) => {
     try {
+      console.log("ID do usuário:", req.user.id);
       const { descricao, nota } = req.body;
       const userId = req.user.id;
 

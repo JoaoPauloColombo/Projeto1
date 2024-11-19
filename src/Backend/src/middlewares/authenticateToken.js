@@ -11,16 +11,17 @@ function authenticateToken(req, res, next) {
 
   jwt.verify(token, process.env.SECRET, (err, user) => {
     if (err) {
-      console.error("Erro na verificação do token:", err); // Log do erro
-      return res.status(403).json({
-        msg: "Sua sessão expirou, por favor faça login novamente"
-      });
+        console.error("Erro na verificação do token:", err); // Log do erro
+        return res.status(403).json({
+            msg: "Sua sessão expirou, por favor faça login novamente"
+        });
     }
 
-    // Armazenar usuário na requisição
+    console.log("Usuário autenticado:", user); // Log do usuário autenticado
     req.user = user;
     next();
-  });
+});
+
 }
 
 module.exports = authenticateToken;
