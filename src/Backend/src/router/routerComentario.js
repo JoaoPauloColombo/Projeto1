@@ -22,6 +22,11 @@ router.get('/:id', validateComentarioId, (req, res) => {
     ComentarioController.getOne(req, res);
 });
 
+// Nova rota para buscar comentários por coordenadaId
+router.get('/coordenadas/:coordenadaId/comentarios', (req, res) => {
+    ComentarioController.getByCoordenada(req, res);
+});
+
 router.delete('/:id', authenticateToken, validateComentarioId, (req, res) => {
     ComentarioController.delete(req, res);
 });
