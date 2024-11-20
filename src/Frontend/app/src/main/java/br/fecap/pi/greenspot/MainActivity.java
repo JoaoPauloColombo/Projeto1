@@ -1,6 +1,7 @@
 package br.fecap.pi.greenspot;
 
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap gMap;
     private static final String BASE_URL = "https://projeto1-1vh9.onrender.com/api/coordenadas/";
+    private static final String AUTH_PREFS = "auth";
+    private static final String TOKEN_KEY = "token";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,9 +186,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         RequestBody requestBody = RequestBody.create(comentarioJson.toString(), MediaType.get("application/json; charset=utf-8"));
 
+        // Recuperar o token das SharedPreferences
+        String token = getToken();
+
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
+                .addHeader("Authorization", "Bearer " + token) // Adiciona o token no cabeçalho
                 .build();
 
         client.newCall(request).enqueue(new okhttp3.Callback() {
@@ -201,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (response.isSuccessful()) {
                     runOnUiThread(() -> {
                         Toast.makeText(MainActivity.this, "Comentário enviado com sucesso!", Toast.LENGTH_SHORT).show();
+                        // Adiciona o novo comentário ao layout
                         // Adiciona o novo comentário ao layout
                         addComentarioToLayout(description, rating, layoutComentarios, pointName);
                     });
@@ -307,5 +315,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Aqui você pode implementar a lógica para mostrar os comentários filtrados
         Toast.makeText(this, "Mostrando comentários de: " + nomeEcoponto, Toast.LENGTH_SHORT).show();
         // Você pode chamar fetchComentarios aqui para obter os comentários desse ecoponto específico
+        // Por exemplo:
+        LinearLayout layoutComentarios = findViewById(R.id.layout_comentarios); // Ajuste conforme necessário
+        fetchComentarios(nomeEcoponto, layoutComentarios);
+    }
+
+    private String getToken() {
+        // Recupera o token armazenado nas SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences(AUTH_PREFS, MODE_PRIVATE);
+        return sharedPreferences.getString(TOKEN_KEY, null); // Retorna null se o token não existir
     }
 }
