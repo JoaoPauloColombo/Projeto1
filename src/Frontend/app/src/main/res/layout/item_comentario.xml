@@ -3,28 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@color/Principal"
     android:padding="16dp">
 
     <EditText
         android:id="@+id/description_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/white"
         android:hint="Digite seu comentário" />
 
     <RatingBar
         android:id="@+id/rating_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
         android:numStars="5"
         android:stepSize="1"
         android:layout_marginTop="8dp" />
 
-    <!-- Aqui é onde os comentários serão exibidos -->
     <LinearLayout
         android:id="@+id/layout_comentarios"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:backgroundTint="@color/Principal"
         android:layout_marginTop="16dp" />
 
 </LinearLayout>

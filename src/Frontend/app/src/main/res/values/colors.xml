@@ -3,4 +3,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="Principal">#40A578</color>
+    <color name="Botao">#3cb371</color>
 </resources>
