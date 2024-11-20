@@ -138,6 +138,30 @@ const ComentarioController = {
       });
     }
   },
+  getByCoordenada: async (req, res) => {
+    try {
+      const { coordenadaId } = req.params; // Obtenha coordenadaId dos parâmetros da requisição
+
+      const comentarios = await Comentario.findAll({
+        where: { coordenadaId }, // Filtre os comentários pela coordenadaId
+        include: [{
+          model: User,
+          attributes: ['nome', 'email']
+        }]
+      });
+
+      return res.status(200).json({
+        msg: "Comentários encontrados!",
+        comentarios,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar comentários:", error);
+      return res.status(500).json({ 
+        msg: "Erro interno ao buscar comentários. Acione o suporte.", 
+        error: error.message 
+      });
+    }
+  }
 };
 
 module.exports = ComentarioController;
