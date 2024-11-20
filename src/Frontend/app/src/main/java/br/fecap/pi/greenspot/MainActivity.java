@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             float rating = ratingBar.getRating();
 
             if (!description.isEmpty() && rating > 0) {
-                sendComentario(pointName, description, rating, layoutComentarios);
+                sendComentario(pointName, description, rating,0, layoutComentarios);
             } else {
                 Toast.makeText(MainActivity.this, "Por favor, insira um comentário e uma classificação.", Toast.LENGTH_SHORT).show();
             }
