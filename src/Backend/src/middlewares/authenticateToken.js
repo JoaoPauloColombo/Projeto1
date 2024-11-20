@@ -15,13 +15,13 @@ const authenticateToken = (req, res, next) => {
     }
 
     // Verifica o token
-    jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+    jwt.verify(token, process.env.SECRET, (err, user) => { // Use a mesma variável aqui
         if (err) {
             console.log("Erro na verificação do token:", err.message); // Log do erro
             return res.status(403).json({ msg: "Token inválido", error: err.message });
         }
         
-        // Log do usuário decodificado (sem informações sensíveis)
+        // Log do usuário autenticado
         console.log("Usuário autenticado:", user); // Log do usuário autenticado
         req.user = user; // Salva o usuário no objeto de requisição
         next();

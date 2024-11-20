@@ -6,33 +6,69 @@ const UserController = {
   login: async (req, res) => {
     try {
       const { email, senha } = req.body;
-  
+
       // Validação de entrada
       if (!email || !senha) {
         return res.status(400).json({ msg: "Email e senha são obrigatórios." });
       }
-  
+
       console.log(`Tentando fazer login com o email: ${email}`);
-  
+
       // Busca o usuário pelo email
       const user = await User.findOne({ where: { email } });
-  
+
       console.log(`Usuário encontrado: ${JSON.stringify(user)}`);
-  
+
       // Verifica se o usuário existe e se a senha está correta
       const isPasswordValid = user && await bcrypt.compare(senha, user.senha);
-  
+
       if (!isPasswordValid) {
         return res.status(401).json({ msg: "Credenciais inválidas." });
       }
-  
+
       // Gera o token JWT
       const token = jwt.sign(
         { id: user.id, email: user.email, nome: user.nome },
         process.env.SECRET,
         { expiresIn: "1h" }
       );
-  
+
+      // Retorna o token ao cliente
+      return res.status(200).json({ msg: "Login realizado", token });
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
+      return res.status(500).json({ msg: "Erro ao fazer login." });
+    }
+  }, login: async (req, res) => {
+    try {
+      const { email, senha } = req.body;
+
+      // Validação de entrada
+      if (!email || !senha) {
+        return res.status(400).json({ msg: "Email e senha são obrigatórios." });
+      }
+
+      console.log(`Tentando fazer login com o email: ${email}`);
+
+      // Busca o usuário pelo email
+      const user = await User.findOne({ where: { email } });
+
+      console.log(`Usuário encontrado: ${JSON.stringify(user)}`);
+
+      // Verifica se o usuário existe e se a senha está correta
+      const isPasswordValid = user && await bcrypt.compare(senha, user.senha);
+
+      if (!isPasswordValid) {
+        return res.status(401).json({ msg: "Credenciais inválidas." });
+      }
+
+      // Gera o token JWT
+      const token = jwt.sign(
+        { id: user.id, email: user.email, nome: user.nome },
+        process.env.SECRET, // Certifique-se de que esta variável está definida
+        { expiresIn: "1h" }
+      );
+
       // Retorna o token ao cliente
       return res.status(200).json({ msg: "Login realizado", token });
     } catch (error) {
