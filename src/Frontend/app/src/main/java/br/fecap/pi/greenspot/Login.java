@@ -48,7 +48,7 @@ public class Login extends AppCompatActivity {
                     return;
                 }
 
-                // Enviar email e senha diretamente, sem criptografia
+                // Enviar email e senha para o servidor
                 RequestBody requestBody = new okhttp3.FormBody.Builder()
                         .add("email", email)
                         .add("senha", senha)
