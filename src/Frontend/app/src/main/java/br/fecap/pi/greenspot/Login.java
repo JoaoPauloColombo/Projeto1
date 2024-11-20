@@ -87,7 +87,7 @@ public class Login extends AppCompatActivity {
                                 sharedPreferences.edit().putString("token", token).apply();
 
                                 // Redirecione o usuário para a tela principal
-                                Intent intent = new Intent(Login.this, MainActivity.class);
+                                Intent intent = new Intent(Login.this, Tutorial1.class);
                                 startActivity(intent);
                                 finish();
                             } catch (JSONException e) {
