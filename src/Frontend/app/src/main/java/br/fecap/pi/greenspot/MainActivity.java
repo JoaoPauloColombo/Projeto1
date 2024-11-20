@@ -161,9 +161,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.show();
     }
 
-    private void sendComentario(String pointName, String description, float rating, LinearLayout layoutComentarios) {
+    private void sendComentario(String pointName, String description, float rating, int coordenadaId, LinearLayout layoutComentarios) {
         // Verifica se os parâmetros são válidos
-        if (pointName == null || pointName.isEmpty() || description == null || description.isEmpty() || rating < 0) {
+        if (pointName == null || pointName.isEmpty() || description == null || description.isEmpty() || rating < 0 || coordenadaId <= 0) {
             Toast.makeText(MainActivity.this, "Por favor, preencha todos os campos corretamente.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             comentarioJson.put("nome", pointName);
             comentarioJson.put("descricao", description);
             comentarioJson.put("nota", rating);
+            comentarioJson.put("coordenadaId", coordenadaId);
             Log.d("SendComentario", "JSON enviado: " + comentarioJson.toString());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -208,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (response.isSuccessful()) {
                     runOnUiThread(() -> {
                         Toast.makeText(MainActivity.this, "Comentário enviado com sucesso!", Toast.LENGTH_SHORT).show();
-                        // Adiciona o novo comentário ao layout
                         // Adiciona o novo comentário ao layout
                         addComentarioToLayout(description, rating, layoutComentarios, pointName);
                     });
