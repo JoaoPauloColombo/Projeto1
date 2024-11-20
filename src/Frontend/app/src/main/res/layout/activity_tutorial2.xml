@@ -35,18 +35,17 @@
 
     <TextView
         android:id="@+id/textView9"
-        android:layout_width="636dp"
-        android:layout_height="114dp"
-        android:padding="20dp"
+        android:layout_width="340dp"
+        android:layout_height="102dp"
         android:text="Reaproveite materiais e objetos que você já não usa mais, dando-lhes uma nova função. Criatividade e sustentabilidade andam juntas!"
         android:textAlignment="center"
         android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.89" />
+        app:layout_constraintVertical_bias="0.852" />
 
     <ImageView
         android:id="@+id/btnCarrossel1"
