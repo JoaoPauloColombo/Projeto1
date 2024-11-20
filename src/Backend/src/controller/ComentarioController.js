@@ -4,28 +4,33 @@ const User = require("../models/User");
 const ComentarioController = {
   create: async (req, res) => {
     try {
-      if (!req.user || !req.user.id) {
-        return res.status(401).json({ msg: "Usuário não autenticado." });
-      }
-  
-      console.log("ID do usuário:", req.user.id);
-      const { descricao, nota } = req.body;
-      const userId = req.user.id;
-  
-      const comentarioCriado = await Comentario.create({ descricao, nota, userId });
-  
-      return res.status(201).json({
-        msg: "Comentário criado com sucesso!",
-        comentario: comentarioCriado,
-      });
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ msg: "Usuário não autenticado." });
+        }
+
+        console.log("ID do usuário:", req.user.id);
+        const { descricao, nota, coordenadaId } = req.body; // Adicione coordenadaId aqui
+        const userId = req.user.id;
+
+        // Verifique se coordenadaId foi passado
+        if (!coordenadaId) {
+            return res.status(400).json({ msg: "coordenadaId é obrigatório." });
+        }
+
+        const comentarioCriado = await Comentario.create({ descricao, nota, userId, coordenadaId }); // Inclua coordenadaId aqui
+
+        return res.status(201).json({
+            msg: "Comentário criado com sucesso!",
+            comentario: comentarioCriado,
+        });
     } catch (error) {
-      console.error("Erro ao criar comentário:", error);
-      return res.status(500).json({ 
-        msg: "Erro interno ao criar comentário. Acione o suporte.", 
-        error: error.message 
-      });
+        console.error("Erro ao criar comentário:", error);
+        return res.status(500).json({ 
+            msg: "Erro interno ao criar comentário. Acione o suporte.", 
+            error: error.message 
+        });
     }
-  },
+},
   
   update: async (req, res) => {
     try {

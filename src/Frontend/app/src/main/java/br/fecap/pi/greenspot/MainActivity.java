@@ -93,10 +93,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     JSONObject coordenadaObject = coordenadasArray.getJSONObject(i);
                                     double latitude = coordenadaObject.getDouble("latitude");
                                     double longitude = coordenadaObject.getDouble("longitude");
+                                    int id = coordenadaObject.getInt("id");
                                     String nome = coordenadaObject.getString("nome");
 
                                     Log.d("MainActivity", "Adicionando marcador: " + nome + " - Lat: " + latitude + ", Lng: " + longitude);
-                                    addMarkerToMap(latitude, longitude, nome);
+                                    addMarkerToMap(latitude, longitude, nome, id);
                                 } catch (JSONException e) {
                                     Log.e("MainActivity", "Erro ao parsear JSON: " + e.getMessage());
                                 }
@@ -115,9 +116,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void addMarkerToMap(double latitude, double longitude, String nome) {
+    private void addMarkerToMap(double latitude, double longitude, String nome, int id) {
         LatLng coordenada = new LatLng(latitude, longitude);
-        gMap.addMarker(new MarkerOptions().position(coordenada).title(nome));
+        Marker marker = gMap.addMarker(new MarkerOptions().position(coordenada).title(nome));
+        marker.setTag(id);
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordenada, 12)); // Ajuste o zoom conforme necessário
     }
 
@@ -131,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return null; // Retorna null para usar o layout padrão do InfoWindow
     }
 
-    private void showCommentDialog(String pointName) {
+    private void showCommentDialog(String pointName, int coordenadaId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Comentar sobre " + pointName);
 
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             float rating = ratingBar.getRating();
 
             if (!description.isEmpty() && rating > 0) {
-                sendComentario(pointName, description, rating,0, layoutComentarios);
+                sendComentario(pointName, description, rating, coordenadaId, layoutComentarios); // Passa o ID correto
             } else {
                 Toast.makeText(MainActivity.this, "Por favor, insira um comentário e uma classificação.", Toast.LENGTH_SHORT).show();
             }
@@ -160,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         builder.show();
     }
+
 
     private void sendComentario(String pointName, String description, float rating, int coordenadaId, LinearLayout layoutComentarios) {
         // Verifica se os parâmetros são válidos
@@ -306,8 +309,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public boolean onMarkerClick(Marker marker) {
-        // Chama o método para mostrar o diálogo de comentários ao clicar no marcador
-        showCommentDialog(marker.getTitle());
+        int coordenadaId = (int) marker.getTag(); // Recupera o ID do marcador
+        showCommentDialog(marker.getTitle(), coordenadaId); // Passa o ID para o diálogo
         return true; // Retorna true para evitar que o InfoWindow padrão seja exibido
     }
 
