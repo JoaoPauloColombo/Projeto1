@@ -1,12 +1,14 @@
 package br.fecap.pi.greenspot;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -140,17 +142,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return null; // Retorna null para usar o layout padrão do InfoWindow
     }
 
-    private void showCommentDialog(String pointName, int coordenadaId) {
+    private void showCommentDialog(String pointName, int coordenadaId, double latitude, double longitude) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Cria um TextView para o título
         TextView titleTextView = new TextView(this);
         titleTextView.setText("Comentar sobre " + pointName);
-        titleTextView.setTextSize(20); // Define o tamanho da fonte
-        titleTextView.setTextColor(getResources().getColor(R.color.black)); // Define a cor do texto
-        titleTextView.setTypeface(null, Typeface.BOLD); // Define o texto como negrito
-        titleTextView.setGravity(Gravity.CENTER); // Centraliza o texto
-        titleTextView.setPadding(16, 16, 16, 16); // Adiciona padding ao redor do texto
+        titleTextView.setTextSize(20);
+        titleTextView.setTextColor(getResources().getColor(R.color.black));
+        titleTextView.setTypeface(null, Typeface.BOLD);
+        titleTextView.setGravity(Gravity.CENTER);
+        titleTextView.setPadding(16, 16, 16, 16);
 
         // Define o título personalizado
         builder.setCustomTitle(titleTextView);
@@ -161,29 +163,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         EditText descriptionInput = dialogView.findViewById(R.id.description_input);
         RatingBar ratingBar = dialogView.findViewById(R.id.rating_bar);
         LinearLayout layoutComentarios = dialogView.findViewById(R.id.layout_comentarios);
+        Button buttonOpenMap = dialogView.findViewById(R.id.button_open_map); // Referência ao botão
 
         // Carregar comentários existentes ao abrir o diálogo
         fetchComentarios(coordenadaId, layoutComentarios); // Passa o coordenadaId correto
 
-        // Estilizando o EditText
-        GradientDrawable inputBackground = new GradientDrawable();
-        inputBackground.setColor(getResources().getColor(R.color.white)); // Fundo branco
-        inputBackground.setStroke(2, getResources().getColor(R.color.Botao)); // Borda cinza escura
-        inputBackground.setCornerRadius(8); // Cantos arredondados
-        descriptionInput.setBackground(inputBackground); // Aplica o fundo ao EditText
-        descriptionInput.setTextColor(getResources().getColor(R.color.black)); // Texto preto
-        descriptionInput.setHintTextColor(getResources().getColor(R.color.Botao)); // Dica em cinza escuro
+        // Exibir coordenadas em DMS
+        String latitudeDMS = convertToDMS(latitude, true);
+        String longitudeDMS = convertToDMS(longitude, false);
 
-        // Definindo cores do RatingBar
-        ratingBar.setProgressTintList(ColorStateList.valueOf(Color.WHITE)); // Cor do progresso para branco
-        ratingBar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#40A578"))); // Cor de fundo do RatingBar
+        // Configurar o botão para abrir o Google Maps
+        buttonOpenMap.setOnClickListener(v -> {
+            openGoogleMaps(latitude, longitude);
+        });
 
         builder.setPositiveButton("Enviar", (dialog, which) -> {
             String description = descriptionInput.getText().toString().trim();
             float rating = ratingBar.getRating();
 
             if (!description.isEmpty() && rating > 0) {
-                // Passa o coordenadaId correto aqui
                 sendComentario(pointName, description, rating, coordenadaId, layoutComentarios);
             } else {
                 Toast.makeText(MainActivity.this, "Por favor, insira um comentário e uma classificação.", Toast.LENGTH_SHORT).show();
@@ -195,20 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Customize o fundo do diálogo
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
-            // Define a cor de fundo do diálogo para a cor Principal
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.Principal))); // Cor Principal
-
-            // Estilizando os botões
-            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            positiveButton.setBackgroundColor(getResources().getColor(R.color.Botao )); // Fundo branco
-            positiveButton.setTextColor(getResources().getColor(android.R.color.white)); // Texto preto
-            positiveButton.setTypeface(null, Typeface.BOLD); // Texto em negrito
-
-
-            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-            negativeButton.setBackgroundColor(getResources().getColor(R.color.Botao )); // Fundo branco
-            negativeButton.setTextColor(getResources().getColor(android.R.color.white)); // Texto preto
-            negativeButton.setTypeface(null, Typeface.BOLD); // Texto em negrito
+            // Estilizando os botões...
         });
 
         dialog.show();
@@ -397,11 +382,58 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void openGoogleMaps(double latitude, double longitude) {
+        // Converte as coordenadas para DMS
+        String latitudeDMS = convertToDMS(latitude, true);
+        String longitudeDMS = convertToDMS(longitude, false);
+
+        // Formata a URI para abrir no Google Maps
+        String uri = String.format("https://www.google.com/maps?q=%s,%s", latitudeDMS, longitudeDMS);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+
+        // Verifica se há um aplicativo de navegador disponível
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Nenhum aplicativo de navegador disponível.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String convertCommaToPoint(String value) {
+        return value.replace(',', '.');
+    }
+
     public boolean onMarkerClick(Marker marker) {
         int coordenadaId = (int) marker.getTag(); // Recupera o ID do marcador
-        Log.d("MainActivity", "coordenadaId do marcador: " + coordenadaId); // Adicione esta linha
-        showCommentDialog(marker.getTitle(), coordenadaId); // Passa o ID para o diálogo
+        LatLng position = marker.getPosition();
+        double latitude = position.latitude;
+        double longitude = position.longitude;
+
+        // Mostra o diálogo de comentários com as coordenadas
+        showCommentDialog(marker.getTitle(), coordenadaId, latitude, longitude); // Passa latitude e longitude
         return true; // Retorna true para evitar que o InfoWindow padrão seja exibido
+    }
+
+    private String convertToDMS(double decimal, boolean isLatitude) {
+        String direction;
+
+        if (isLatitude) {
+            direction = decimal < 0 ? "S" : "N"; // Sul ou Norte
+        } else {
+            direction = decimal < 0 ? "W" : "E"; // Oeste ou Leste
+        }
+
+        decimal = Math.abs(decimal);
+        int degrees = (int) decimal;
+        decimal = (decimal - degrees) * 60;
+        int minutes = (int) decimal;
+        double seconds = (decimal - minutes) * 60;
+
+        // Formata os segundos com um ponto decimal
+        String formattedSeconds = convertCommaToPoint(String.format("%.1f", seconds));
+
+        // Retorna o formato DMS sem vírgulas
+        return String.format("%d°%d'%s\"%s", degrees, minutes, formattedSeconds, direction);
     }
 
     private void mostrarComentariosDoEcoponto(String nomeEcoponto) {
