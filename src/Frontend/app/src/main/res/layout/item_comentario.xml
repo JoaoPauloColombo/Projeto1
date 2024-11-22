@@ -30,4 +30,11 @@
         android:backgroundTint="@color/Principal"
         android:layout_marginTop="16dp" />
 
+    <Button
+        android:id="@+id/button_open_map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ver Localização no Google Maps"
+        android:layout_marginTop="16dp"/>
+
 </LinearLayout>
